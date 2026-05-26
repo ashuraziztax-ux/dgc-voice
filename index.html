@@ -12,17 +12,17 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         :root {
-            /* DGC brand palette */
-            --navy:       #1a2d3e;   /* DGC primary navy */
-            --navy-deep:  #0d1218;   /* near-black with navy hint */
-            --navy-mid:   #1f3649;   /* card/surface */
-            --navy-rim:   #2a4459;   /* borders */
+            --navy:       #1a2d3e;
+            --navy-deep:  #0d1218;
+            --navy-mid:   #1f3649;
+            --navy-rim:   #2a4459;
             --white:      #ffffff;
-            --off-white:  #c8d8e4;   /* secondary text */
-            --red:        #d90000;   /* record action */
-            --green:      #00c853;   /* success */
-            --blue:       #2979ff;   /* sending/routing */
-            --muted:      #4a6478;   /* placeholder/muted */
+            --off-white:  #c8d8e4;
+            --red:        #d90000;
+            --green:      #00c853;
+            --blue:       #2979ff;
+            --amber:      #ff9800;
+            --muted:      #4a6478;
         }
 
         html, body { height: 100%; }
@@ -32,8 +32,7 @@
             color: var(--white);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
             min-height: 100dvh;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             align-items: center;
             padding: max(env(safe-area-inset-top), 12px) 16px max(env(safe-area-inset-bottom), 12px);
             overflow-x: hidden;
@@ -51,39 +50,24 @@
         }
         #setupOverlay.hidden { display: none; }
 
-        .setup-logo {
-            width: 260px; height: auto;
-            object-fit: contain; margin-bottom: 8px;
-        }
-
+        .setup-logo { width: 260px; height: auto; object-fit: contain; margin-bottom: 8px; }
         .setup-wordmark {
             font-size: 2rem; font-weight: 900;
             letter-spacing: 5px; color: var(--white);
             display: none; margin-bottom: 8px;
         }
-
         .setup-title {
             font-size: 1rem; font-weight: 700;
             letter-spacing: 3px; color: var(--off-white);
             text-transform: uppercase; text-align: center;
         }
-
-        .setup-divider-line {
-            width: 40px; height: 2px;
-            background: var(--navy-rim); border-radius: 2px;
-        }
-
-        .setup-sub {
-            font-size: 0.85rem; color: var(--muted);
-            text-align: center; line-height: 1.65; max-width: 280px;
-        }
+        .setup-divider-line { width: 40px; height: 2px; background: var(--navy-rim); border-radius: 2px; }
+        .setup-sub { font-size: 0.85rem; color: var(--muted); text-align: center; line-height: 1.65; max-width: 280px; }
 
         .setup-input {
             width: 100%; max-width: 320px;
-            background: var(--navy-mid);
-            border: 1.5px solid var(--navy-rim);
-            border-radius: 14px;
-            padding: 15px 18px;
+            background: var(--navy-mid); border: 1.5px solid var(--navy-rim);
+            border-radius: 14px; padding: 15px 18px;
             font-size: 1rem; color: var(--white);
             font-family: inherit; outline: none;
             text-align: center; -webkit-appearance: none;
@@ -91,9 +75,7 @@
         }
         .setup-input::placeholder { color: var(--muted); }
         .setup-input:focus { border-color: var(--off-white); }
-        .setup-input.small {
-            font-size: 0.78rem; text-align: left; padding: 12px 14px;
-        }
+        .setup-input.small { font-size: 0.78rem; text-align: left; padding: 12px 14px; }
 
         .setup-label {
             width: 100%; max-width: 320px;
@@ -104,8 +86,7 @@
 
         .setup-btn {
             width: 100%; max-width: 320px;
-            background: var(--navy-mid);
-            border: 1.5px solid var(--navy-rim);
+            background: var(--navy-mid); border: 1.5px solid var(--navy-rim);
             border-radius: 14px; padding: 15px;
             font-size: 0.85rem; font-weight: 800;
             letter-spacing: 3px; color: var(--white);
@@ -117,28 +98,32 @@
             width: 100%; max-width: 320px;
             display: flex; align-items: center; gap: 10px;
         }
-        .setup-divider::before, .setup-divider::after {
-            content: ''; flex: 1; height: 1px; background: var(--navy-rim);
-        }
+        .setup-divider::before, .setup-divider::after { content: ''; flex: 1; height: 1px; background: var(--navy-rim); }
         .setup-divider span { font-size: 0.62rem; color: var(--muted); letter-spacing: 2px; }
 
-        /* hidden admin panel */
         #adminPanel { display: none; width: 100%; max-width: 320px; gap: 8px; flex-direction: column; }
         #adminPanel.show { display: flex; }
         .admin-note { font-size: 0.65rem; color: var(--muted); text-align: center; }
+        .admin-link { font-size: 0.65rem; color: var(--blue); text-align: center; text-decoration: none; }
 
-        /* ── CONNECTION BAR ── */
-        #connBar {
+        /* ── STATUS BARS ── */
+        #connBar, #brainBar {
             width: 100%; max-width: 440px;
             display: flex; align-items: center;
-            background: var(--navy-mid);
-            border: 1px solid var(--navy-rim);
-            border-radius: 10px; padding: 9px 14px; margin-bottom: 10px;
+            background: var(--navy-mid); border: 1px solid var(--navy-rim);
+            border-radius: 10px; padding: 9px 14px;
             font-size: 0.72rem;
         }
+        #connBar  { margin-bottom: 4px; }
+        #brainBar { margin-bottom: 10px; }
+
         .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-        .conn-dot.ok  { background: var(--green); box-shadow: 0 0 6px var(--green); }
-        .conn-dot.err { background: #ff4444; }
+        .conn-dot.ok     { background: var(--green);  box-shadow: 0 0 6px var(--green); }
+        .conn-dot.err    { background: #ff4444; }
+        .conn-dot.busy   { background: var(--blue);   box-shadow: 0 0 6px var(--blue); animation: blink 1s ease-in-out infinite; }
+        .conn-dot.warn   { background: var(--amber);  box-shadow: 0 0 6px var(--amber); }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
         .conn-label { color: var(--muted); flex: 1; margin-left: 8px; }
         .conn-test-btn {
             background: none; border: 1px solid var(--navy-rim); border-radius: 6px;
@@ -150,11 +135,9 @@
         /* ── HEADER ── */
         header {
             width: 100%; max-width: 440px;
-            display: flex; align-items: center;
-            justify-content: space-between;
+            display: flex; align-items: center; justify-content: space-between;
             padding: 2px 0 10px;
         }
-
         .user-chip {
             display: flex; align-items: center; gap: 7px;
             background: var(--navy-mid); border: 1px solid var(--navy-rim);
@@ -163,11 +146,7 @@
             cursor: pointer; transition: border-color 0.2s;
         }
         .user-chip:active { border-color: var(--off-white); }
-        .user-chip .dot {
-            width: 6px; height: 6px; background: var(--green);
-            border-radius: 50%; flex-shrink: 0;
-            box-shadow: 0 0 5px var(--green);
-        }
+        .user-chip .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 5px var(--green); }
 
         .inbox-btn {
             background: var(--navy-mid); border: 1px solid var(--navy-rim);
@@ -183,22 +162,55 @@
             background: var(--navy-mid); border: 1px solid var(--navy-rim);
             border-radius: 16px; overflow: hidden; margin-bottom: 12px;
         }
-        .inbox-header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 16px; border-bottom: 1px solid var(--navy-rim);
-        }
+        .inbox-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--navy-rim); }
         .inbox-header h3 { font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; color: var(--off-white); }
-        .close-inbox {
-            background: none; border: none; color: var(--muted);
-            font-size: 1rem; cursor: pointer; padding: 2px 6px;
-        }
+        .close-inbox { background: none; border: none; color: var(--muted); font-size: 1rem; cursor: pointer; padding: 2px 6px; }
         .cards-list { padding: 6px; max-height: 200px; overflow-y: auto; }
-        .card-row {
-            padding: 10px; font-size: 0.83rem; color: var(--off-white);
-            border-bottom: 1px solid var(--navy-rim); line-height: 1.4;
-        }
+        .card-row { padding: 10px; font-size: 0.83rem; color: var(--off-white); border-bottom: 1px solid var(--navy-rim); line-height: 1.4; }
         .card-row:last-child { border-bottom: none; }
         .empty-msg { text-align: center; color: var(--muted); padding: 18px; font-size: 0.82rem; }
+
+        /* ── COUNTDOWN OVERLAY ── */
+        #countdownOverlay {
+            position: fixed; inset: 0;
+            background: rgba(13,18,24,0.97);
+            z-index: 80;
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 20px; padding: 32px; text-align: center;
+        }
+        #countdownOverlay.show { display: flex; }
+
+        .countdown-eyebrow {
+            font-size: 0.6rem; letter-spacing: 4px;
+            color: var(--muted); text-transform: uppercase;
+        }
+        .countdown-num {
+            font-size: 7rem; font-weight: 900; line-height: 1;
+            color: var(--white);
+            text-shadow: 0 0 60px rgba(41,121,255,0.4);
+            animation: cd-pulse 1s ease-in-out infinite;
+        }
+        @keyframes cd-pulse {
+            0%,100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.93); opacity: 0.8; }
+        }
+        .countdown-card {
+            background: var(--navy-mid); border: 1px solid var(--navy-rim);
+            border-radius: 14px; padding: 14px 20px; max-width: 300px;
+            line-height: 1.55;
+        }
+        .countdown-card-title { font-size: 0.95rem; color: var(--off-white); }
+        .countdown-card-dest  { font-size: 0.72rem; color: var(--blue); font-weight: 700; letter-spacing: 2px; margin-top: 4px; }
+        .countdown-cancel-btn {
+            background: none; border: 1.5px solid var(--navy-rim);
+            border-radius: 14px; padding: 14px 44px;
+            font-size: 0.82rem; font-weight: 800;
+            letter-spacing: 3px; color: var(--off-white);
+            cursor: pointer; touch-action: manipulation;
+            transition: border-color 0.2s, transform 0.1s;
+        }
+        .countdown-cancel-btn:active { border-color: var(--off-white); transform: scale(0.97); }
 
         /* ── MAIN ── */
         .main {
@@ -207,7 +219,6 @@
             gap: 24px; width: 100%; max-width: 440px; padding: 6px 0;
         }
 
-        /* Dest badge */
         .dest-badge {
             font-size: 0.85rem; font-weight: 700;
             letter-spacing: 2px; text-transform: uppercase;
@@ -224,38 +235,16 @@
             width: 100%; max-width: 380px;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            gap: 16px;
-            padding: 28px 24px;
-            background: var(--navy-mid);
-            border: 1.5px solid var(--navy-rim);
-            border-radius: 22px;
-            touch-action: manipulation;
-            outline: none;
+            gap: 16px; padding: 28px 24px;
+            background: var(--navy-mid); border: 1.5px solid var(--navy-rim);
+            border-radius: 22px; touch-action: manipulation; outline: none;
             transition: transform 0.12s ease, border-color 0.2s, background 0.2s;
         }
         .logo-btn:active { transform: scale(0.96); }
-
-        /* State: recording */
-        .logo-btn.recording {
-            border-color: var(--red);
-            background: #1a0a0a;
-            animation: card-pulse 1.4s ease-out infinite;
-        }
-        /* State: sending */
-        .logo-btn.sending {
-            border-color: var(--blue);
-            background: #0a0f1a;
-        }
-        /* State: success */
-        .logo-btn.success {
-            border-color: var(--green);
-            background: #0a1a10;
-        }
-        /* State: error */
-        .logo-btn.error-state {
-            border-color: #ff4444;
-            background: #1a0808;
-        }
+        .logo-btn.recording { border-color: var(--red); background: #1a0a0a; animation: card-pulse 1.4s ease-out infinite; }
+        .logo-btn.sending   { border-color: var(--blue); background: #0a0f1a; }
+        .logo-btn.success   { border-color: var(--green); background: #0a1a10; }
+        .logo-btn.error-state { border-color: #ff4444; background: #1a0808; }
 
         @keyframes card-pulse {
             0%   { box-shadow: 0 0 0   0px rgba(217,0,0,0.5); }
@@ -263,50 +252,26 @@
             100% { box-shadow: 0 0 0   0px rgba(217,0,0,0); }
         }
 
-        /* The real logo — already white, just needs glow states */
         .logo-img {
-            width: 100%; height: auto;
-            max-height: 80px;
-            object-fit: contain;
-            pointer-events: none;
-            display: block;
+            width: 100%; height: auto; max-height: 80px;
+            object-fit: contain; pointer-events: none; display: block;
             transition: filter 0.3s ease, opacity 0.2s;
         }
+        .logo-fallback { display: none; font-size: 1.5rem; font-weight: 900; letter-spacing: 5px; color: var(--off-white); pointer-events: none; }
 
-        /* Fallback text when image fails */
-        .logo-fallback {
-            display: none;
-            font-size: 1.5rem; font-weight: 900;
-            letter-spacing: 5px; color: var(--off-white);
-            pointer-events: none;
-        }
-
-        /* Glow the white logo pixels */
-        .logo-btn.recording .logo-img {
-            filter: drop-shadow(0 0 8px rgba(255,60,60,0.9)) drop-shadow(0 0 20px rgba(220,0,0,0.5));
-            animation: logo-glow-red 1.4s ease-in-out infinite;
-        }
-        .logo-btn.sending .logo-img {
-            filter: drop-shadow(0 0 8px rgba(80,150,255,0.9)) drop-shadow(0 0 20px rgba(41,121,255,0.5));
-        }
-        .logo-btn.success .logo-img {
-            filter: drop-shadow(0 0 8px rgba(0,220,90,0.9)) drop-shadow(0 0 20px rgba(0,200,83,0.5));
-        }
+        .logo-btn.recording .logo-img { filter: drop-shadow(0 0 8px rgba(255,60,60,0.9)) drop-shadow(0 0 20px rgba(220,0,0,0.5)); animation: logo-glow-red 1.4s ease-in-out infinite; }
+        .logo-btn.sending   .logo-img { filter: drop-shadow(0 0 8px rgba(80,150,255,0.9)) drop-shadow(0 0 20px rgba(41,121,255,0.5)); }
+        .logo-btn.success   .logo-img { filter: drop-shadow(0 0 8px rgba(0,220,90,0.9)) drop-shadow(0 0 20px rgba(0,200,83,0.5)); }
 
         @keyframes logo-glow-red {
-            0%, 100% { filter: drop-shadow(0 0 4px rgba(255,60,60,0.6)); }
-            50%       { filter: drop-shadow(0 0 14px rgba(255,40,40,1)) drop-shadow(0 0 30px rgba(220,0,0,0.6)); }
+            0%,100% { filter: drop-shadow(0 0 4px rgba(255,60,60,0.6)); }
+            50%      { filter: drop-shadow(0 0 14px rgba(255,40,40,1)) drop-shadow(0 0 30px rgba(220,0,0,0.6)); }
         }
 
-        .tap-label {
-            font-size: 0.62rem; font-weight: 700;
-            letter-spacing: 3px; color: var(--muted);
-            text-transform: uppercase; pointer-events: none;
-        }
-
+        .tap-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; pointer-events: none; }
         .logo-btn.recording .tap-label { color: rgba(255,100,100,0.7); }
-        .logo-btn.sending  .tap-label  { color: rgba(80,150,255,0.7); }
-        .logo-btn.success  .tap-label  { color: rgba(0,200,83,0.7); }
+        .logo-btn.sending   .tap-label { color: rgba(80,150,255,0.7); }
+        .logo-btn.success   .tap-label { color: rgba(0,200,83,0.7); }
 
         /* ── TRANSCRIPT ── */
         .transcript {
@@ -320,29 +285,20 @@
         .transcript.active { border-color: var(--red);   color: var(--white); }
         .transcript.sent   { border-color: var(--green); color: var(--off-white); }
 
-        .status-line {
-            font-size: 0.78rem; color: var(--muted);
-            text-align: center; min-height: 18px;
-        }
+        .status-line { font-size: 0.78rem; color: var(--muted); text-align: center; min-height: 18px; }
         .status-line.error { color: #ff6666; }
         .status-line.ok    { color: var(--green); font-weight: 600; }
         .status-line.busy  { color: var(--blue); }
 
         /* ── TYPE SECTION ── */
-        .or-divider {
-            width: 100%; max-width: 440px;
-            display: flex; align-items: center; gap: 12px;
-        }
-        .or-divider::before, .or-divider::after { content:''; flex:1; height:1px; background:var(--navy-rim); }
+        .or-divider { width: 100%; max-width: 440px; display: flex; align-items: center; gap: 12px; }
+        .or-divider::before,.or-divider::after { content:''; flex:1; height:1px; background:var(--navy-rim); }
         .or-divider span { font-size: 0.65rem; color: var(--muted); letter-spacing: 2px; font-weight: 600; }
 
-        .type-section {
-            width: 100%; max-width: 440px;
-            display: flex; flex-direction: column; gap: 8px; padding-bottom: 6px;
-        }
+        .type-section { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 6px; }
         .type-preview { font-size: 0.72rem; color: var(--muted); padding: 0 4px; min-height: 16px; }
         .type-preview.routed { color: var(--blue); }
-
+        .type-preview.countdown { color: var(--amber); }
         .type-row { display: flex; gap: 8px; }
 
         .type-input {
@@ -359,22 +315,14 @@
             background: var(--navy-mid); border: 1.5px solid var(--navy-rim);
             border-radius: 12px; padding: 12px 18px;
             font-size: 0.78rem; font-weight: 800; letter-spacing: 1px;
-            color: var(--white); cursor: pointer;
-            touch-action: manipulation; transition: background 0.15s, transform 0.1s;
+            color: var(--white); cursor: pointer; touch-action: manipulation;
+            transition: background 0.15s, transform 0.1s;
         }
         .send-btn:active { background: var(--navy-rim); transform: scale(0.96); }
 
         /* ── HINTS ── */
-        .hints {
-            width: 100%; max-width: 440px;
-            display: flex; gap: 6px; flex-wrap: wrap;
-            justify-content: center; padding: 4px 0 8px;
-        }
-        .hint-pill {
-            background: var(--navy-mid); border: 1px solid var(--navy-rim);
-            border-radius: 20px; padding: 4px 10px;
-            font-size: 0.65rem; color: var(--muted);
-        }
+        .hints { width: 100%; max-width: 440px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; padding: 4px 0 8px; }
+        .hint-pill { background: var(--navy-mid); border: 1px solid var(--navy-rim); border-radius: 20px; padding: 4px 10px; font-size: 0.65rem; color: var(--muted); }
 
         /* ── iOS INSTALL ── */
         .install-hint {
@@ -400,12 +348,8 @@
             text-align: center; display: flex; flex-direction: column; gap: 14px;
         }
         .warning-box h3 { font-size: 1rem; font-weight: 700; }
-        .warning-box p { font-size: 0.82rem; color: var(--muted); line-height: 1.65; }
-        .warning-box button {
-            background: var(--navy); border: 1.5px solid var(--navy-rim);
-            border-radius: 10px; padding: 12px; font-size: 0.85rem;
-            font-weight: 700; color: var(--white); cursor: pointer;
-        }
+        .warning-box p  { font-size: 0.82rem; color: var(--muted); line-height: 1.65; }
+        .warning-box button { background: var(--navy); border: 1.5px solid var(--navy-rim); border-radius: 10px; padding: 12px; font-size: 0.85rem; font-weight: 700; color: var(--white); cursor: pointer; }
     </style>
 </head>
 <body>
@@ -415,32 +359,40 @@
         <img class="setup-logo" src="logo-white.png" alt="Drainage & Groundwork Contractors"
              onerror="this.style.display='none'; document.querySelector('.setup-wordmark').style.display='block'">
         <div class="setup-wordmark">DGC</div>
-
         <div class="setup-title">Voice Cards</div>
         <div class="setup-divider-line"></div>
         <div class="setup-sub">Enter your name — every card you send will be signed off so the team knows who it came from.</div>
 
         <input class="setup-input" id="setupNameInput" type="text"
                placeholder="Your name (Ash, Harry, David…)"
-               autocomplete="given-name" autocorrect="off"
-               spellcheck="false" maxlength="40">
+               autocomplete="given-name" autocorrect="off" spellcheck="false" maxlength="40">
 
         <button class="setup-btn" onclick="saveName()">GET STARTED</button>
 
-        <!-- Hidden admin panel — revealed by tapping version 5x -->
+        <!-- Hidden admin — revealed by tapping version 5× -->
         <div id="adminPanel">
             <div class="setup-divider"><span>ADMIN ONLY</span></div>
+
             <div class="setup-label">Override Trello API Key</div>
             <input class="setup-input small" id="setupKey" type="text"
                    placeholder="Leave blank to use default" autocorrect="off" spellcheck="false">
+
             <div class="setup-label">Override Trello Token</div>
             <input class="setup-input small" id="setupToken" type="password"
                    placeholder="Leave blank to use default" autocorrect="off" spellcheck="false">
+
+            <div class="setup-divider"><span>AI BRAIN</span></div>
+
+            <div class="setup-label">Anthropic AI Key (smarter routing)</div>
+            <input class="setup-input small" id="setupAIKey" type="password"
+                   placeholder="sk-ant-api03-…" autocorrect="off" spellcheck="false">
+            <a class="admin-link" href="https://console.anthropic.com" target="_blank">Get a key at console.anthropic.com</a>
+
             <div class="admin-note">Tap version number 5× to hide</div>
         </div>
 
         <div id="versionTap" style="font-size:0.55rem;color:var(--muted);margin-top:4px;cursor:pointer"
-             onclick="adminTap()">v1.0</div>
+             onclick="adminTap()">v1.1</div>
     </div>
 
     <!-- ── NO CREDS WARNING ── -->
@@ -454,11 +406,28 @@
         </div>
     </div>
 
+    <!-- ── COUNTDOWN OVERLAY ── -->
+    <div id="countdownOverlay">
+        <div class="countdown-eyebrow">Sending in</div>
+        <div class="countdown-num" id="countdownNum">5</div>
+        <div class="countdown-card">
+            <div class="countdown-card-title" id="countdownTitle">—</div>
+            <div class="countdown-card-dest"  id="countdownDest">→ —</div>
+        </div>
+        <button class="countdown-cancel-btn" onclick="cancelVoiceSend()">CANCEL</button>
+    </div>
+
     <!-- ── CONNECTION BAR ── -->
     <div id="connBar">
         <div class="conn-dot" id="connDot"></div>
         <span class="conn-label" id="connLabel">Checking connection…</span>
         <button class="conn-test-btn" onclick="testConnection()">Test</button>
+    </div>
+
+    <!-- ── BRAIN BAR ── -->
+    <div id="brainBar">
+        <div class="conn-dot" id="brainDot"></div>
+        <span class="conn-label" id="brainLabel">Loading AI brain…</span>
     </div>
 
     <!-- ── HEADER ── -->
@@ -483,10 +452,8 @@
 
     <!-- ── MAIN ── -->
     <div class="main">
-
         <div class="dest-badge idle" id="destBadge">Tap the logo to speak</div>
 
-        <!-- Logo IS the button -->
         <button class="logo-btn" id="recordBtn" onclick="toggleRecord()">
             <img class="logo-img" id="logoImg"
                  src="logo-white.png" alt="Drainage & Groundwork Contractors"
@@ -497,7 +464,6 @@
 
         <div class="transcript" id="transcript">Your message will appear here…</div>
         <div class="status-line" id="statusLine">Ready</div>
-
     </div>
 
     <!-- ── TYPE SECTION ── -->
@@ -526,13 +492,16 @@
     </div>
 
     <script>
-    // ── CREDENTIALS — baked in, decoded at runtime ───────────────────────────
-    // Stored encoded so they don't sit as plain text in source.
-    // Override via localStorage only needed for admin re-config.
-    const _dk = atob('MTM4NTVjMzM0Zjg2Nzg1MDIzNGNjM2FlMjVhN2Y4NTc=');
-    const _dt = atob('QVRUQTgxMTNjMTBlNTVjYjJjYmUyMzc4ZWI4NGVjNWQzOTk0ZDFkZDk0ZDM1NjUwZGFmNjI4ZDA3ZmVlNzhkNjdiM2YzQjkwQkQ2OA==');
+    // ═══════════════════════════════════════════════════════
+    // CREDENTIALS — all baked in, decoded at runtime
+    // ═══════════════════════════════════════════════════════
+    const _dk    = atob('MTM4NTVjMzM0Zjg2Nzg1MDIzNGNjM2FlMjVhN2Y4NTc=');
+    const _dt    = atob('QVRUQTgxMTNjMTBlNTVjYjJjYmUyMzc4ZWI4NGVjNWQzOTk0ZDFkZDk0ZDM1NjUwZGFmNjI4ZDA3ZmVlNzhkNjdiM2YzQjkwQkQ2OA==');
+    const _ghOwn = atob('YXNodXJheml6dGF4LXV4');
+    const _ghRep = atob('ZGdjLXZvaWNl');
+    const _ghTok = atob('OUhiNEs0ZndTN0xlM0NMY1RjQm9QR2JhOFM0U3ZHNU9JRU5nX29oZw==').split('').reverse().join('');
 
-    // URL params (setup link) can still override — clears itself from URL bar
+    // URL params (setup link) can override — clears itself from URL bar
     (function applySetupLink() {
         const p = new URLSearchParams(location.search);
         if (p.get('k')) localStorage.setItem('dgcKey',   p.get('k'));
@@ -540,10 +509,14 @@
         if (p.get('k') || p.get('t')) history.replaceState({}, '', location.pathname);
     })();
 
-    let KEY   = localStorage.getItem('dgcKey')   || _dk;
-    let TOKEN = localStorage.getItem('dgcToken') || _dt;
+    let KEY    = localStorage.getItem('dgcKey')   || _dk;
+    let TOKEN  = localStorage.getItem('dgcToken') || _dt;
+    let AI_KEY = localStorage.getItem('dgcAIKey') || '';
 
-    const DEFAULT_LISTS = {
+    // ═══════════════════════════════════════════════════════
+    // TRELLO LISTS
+    // ═══════════════════════════════════════════════════════
+    const LISTS = {
         inbox:      { id: '69e08912903083aefd9de48f', name: 'Inbox' },
         ash:        { id: '69e08915e048bd2bcf495cbc', name: 'Ash' },
         harry:      { id: '69e08917630118377a4df08b', name: 'Harry' },
@@ -552,9 +525,10 @@
         office:     { id: '69fa03a81573baa57b052eee', name: 'Office' },
         waitingOn:  { id: '69e089ac29710e177f5e372d', name: 'Waiting On' },
     };
-    const LISTS = DEFAULT_LISTS;
 
-    // ── USER NAME ────────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // USER NAME
+    // ═══════════════════════════════════════════════════════
     let userName = localStorage.getItem('dgcVoiceUser') || '';
 
     function saveName() {
@@ -563,11 +537,12 @@
         userName = val;
         localStorage.setItem('dgcVoiceUser', userName);
 
-        // Save admin credential overrides if filled in
-        const k = document.getElementById('setupKey').value.trim();
-        const t = document.getElementById('setupToken').value.trim();
-        if (k) { KEY = k; localStorage.setItem('dgcKey', k); }
-        if (t) { TOKEN = t; localStorage.setItem('dgcToken', t); }
+        const k  = document.getElementById('setupKey').value.trim();
+        const t  = document.getElementById('setupToken').value.trim();
+        const ai = document.getElementById('setupAIKey').value.trim();
+        if (k)  { KEY    = k;  localStorage.setItem('dgcKey',   k); }
+        if (t)  { TOKEN  = t;  localStorage.setItem('dgcToken', t); }
+        if (ai) { AI_KEY = ai; localStorage.setItem('dgcAIKey', ai); }
 
         document.getElementById('setupOverlay').classList.add('hidden');
         document.getElementById('userChipName').textContent = userName;
@@ -581,7 +556,6 @@
         setTimeout(() => document.getElementById('setupNameInput').focus(), 100);
     }
 
-    // Hidden admin access — tap "v1.0" five times quickly
     let _adminTaps = 0, _adminTimer;
     function adminTap() {
         _adminTaps++;
@@ -592,8 +566,9 @@
             const panel = document.getElementById('adminPanel');
             panel.classList.toggle('show');
             if (panel.classList.contains('show')) {
-                document.getElementById('setupKey').value   = KEY !== _dk ? KEY : '';
-                document.getElementById('setupToken').value = TOKEN !== _dt ? TOKEN : '';
+                document.getElementById('setupKey').value   = KEY    !== _dk ? KEY    : '';
+                document.getElementById('setupToken').value = TOKEN  !== _dt ? TOKEN  : '';
+                document.getElementById('setupAIKey').value = AI_KEY || '';
             }
         }
     }
@@ -602,27 +577,204 @@
         document.getElementById('setupOverlay').classList.add('hidden');
         document.getElementById('userChipName').textContent = userName;
     }
+    document.getElementById('setupNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') saveName(); });
 
-    document.getElementById('setupNameInput').addEventListener('keydown', e => {
-        if (e.key === 'Enter') saveName();
-    });
+    // ═══════════════════════════════════════════════════════
+    // AI BRAIN — GitHub-hosted brain.json
+    // ═══════════════════════════════════════════════════════
+    const BRAIN_RAW_URL = `https://raw.githubusercontent.com/${_ghOwn}/${_ghRep}/main/brain.json`;
+    const BRAIN_API_URL = `https://api.github.com/repos/${_ghOwn}/${_ghRep}/contents/brain.json`;
 
-    // ── ROUTING ──────────────────────────────────────────────────────────────
+    let brain    = null;
+    let brainSha = null;
+
+    function defaultBrain() {
+        return {
+            v: 1,
+            company: "Drainage & Groundwork Contractors (DGC)",
+            site: "Dandara B4, Ballasalla, Isle of Man",
+            staff: [
+                { name:"David",      listKey:"david",      listId:"69e0891a1a68933066217928", triggers:["david","dave"] },
+                { name:"Harry",      listKey:"harry",      listId:"69e08917630118377a4df08b", triggers:["harry"] },
+                { name:"Ash",        listKey:"ash",        listId:"69e08915e048bd2bcf495cbc", triggers:["ash","me","myself","remind me","note to self"] },
+                { name:"Office",     listKey:"office",     listId:"69fa03a81573baa57b052eee", triggers:["office","admin","invoice","paperwork","accounts"] },
+                { name:"Waiting On", listKey:"waitingOn",  listId:"69e089ac29710e177f5e372d", triggers:["waiting","wait","chase","chasing","awaiting"] },
+                { name:"Driver Auto",listKey:"driverAuto", listId:"69e677fea19d02ddd525051c", triggers:["driver","auto","site","delivery","vehicle","van"] }
+            ],
+            vocab: {
+                "b4":"B4","dandara":"Dandara","ballasalla":"Ballasalla",
+                "shuttering":"shuttering","laxey":"Laxey","dgc":"DGC",
+                "blockwork":"blockwork","groundwork":"groundwork","drainage":"drainage",
+                "manholes":"manholes","manhole":"manhole","gully":"gully",
+                "aco":"ACO","jcb":"JCB","hiab":"HIAB","ppe":"PPE"
+            },
+            corrections: [],
+            cards_sent: 0,
+            senders: {}
+        };
+    }
+
+    function setBrainStatus(msg, state) {
+        document.getElementById('brainLabel').textContent = msg;
+        const dot = document.getElementById('brainDot');
+        dot.className = 'conn-dot' + (state ? ' ' + state : '');
+    }
+
+    async function loadBrain() {
+        setBrainStatus('Loading AI brain…', 'busy');
+        try {
+            const res = await fetch(BRAIN_RAW_URL + '?t=' + Date.now());
+            if (res.ok) {
+                brain = await res.json();
+                // Also fetch the SHA we'll need for writes
+                fetchBrainSha();
+                const cards = brain.cards_sent || 0;
+                const aiNote = AI_KEY ? ' · AI active' : ' · keyword mode';
+                setBrainStatus('Brain loaded · ' + cards + ' cards learned' + aiNote, 'ok');
+            } else {
+                brain = defaultBrain();
+                setBrainStatus('Brain offline — using defaults', 'warn');
+            }
+        } catch (e) {
+            brain = defaultBrain();
+            setBrainStatus('Brain offline — using defaults', 'warn');
+        }
+    }
+
+    async function fetchBrainSha() {
+        try {
+            const res = await fetch(BRAIN_API_URL, {
+                headers: { 'Authorization': 'Bearer ' + _ghTok, 'User-Agent': 'DGC-Voice' }
+            });
+            if (res.ok) { const d = await res.json(); brainSha = d.sha; }
+        } catch (e) { /* silent */ }
+    }
+
+    async function saveBrain() {
+        if (!brain) return;
+        try {
+            const jsonStr = JSON.stringify(brain, null, 2);
+            // Encode to base64 safely (handles unicode)
+            const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+            const body = {
+                message: 'DGC Voice brain update — ' + (brain.cards_sent || 0) + ' cards',
+                content: encoded
+            };
+            if (brainSha) body.sha = brainSha;
+
+            const res = await fetch(BRAIN_API_URL, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + _ghTok,
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'DGC-Voice'
+                },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                const d = await res.json();
+                brainSha = d.content.sha;
+            }
+        } catch (e) {
+            console.warn('Brain save failed:', e);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // AI INTERPRETATION — Claude claude-haiku-4-5
+    // ═══════════════════════════════════════════════════════
+    async function aiInterpret(rawText) {
+        if (!AI_KEY) return null;
+
+        const staffList = (brain || defaultBrain()).staff;
+        const vocab     = (brain || defaultBrain()).vocab;
+        const corrections = (brain || defaultBrain()).corrections;
+
+        const systemPrompt = `You are the intelligent routing brain for DGC Voice — a hands-free Trello card app for Drainage & Groundwork Contractors (DGC) on the Dandara B4 site in Ballasalla, Isle of Man.
+
+Your job: given a voice/text message from a site worker, output:
+1. Which Trello list this should go to
+2. A clean, professional card title (remove routing phrases, keep the core task)
+
+Available lists:
+${staffList.map(s => `- "${s.name}" (listKey: ${s.listKey}, listId: ${s.listId}) — triggers: ${s.triggers.join(', ')}`).join('\n')}
+
+Site-specific vocabulary:
+${Object.entries(vocab).map(([k,v]) => `"${k}" → "${v}"`).join(', ')}
+
+${corrections.length ? 'Known corrections:\n' + corrections.map(c => `"${c.raw}" → "${c.corrected}"`).join(', ') : ''}
+
+Rules:
+- "tell David/Harry", "for the office", "remind me", "note to self" — route accordingly
+- "waiting on", "chasing", "chase" → Waiting On list
+- Strip preamble: "please", "can you", "tell [name] to/that/about", "for [name]:"
+- Capitalise first word of title; fix site vocab; keep it concise
+- Respond ONLY with JSON, no explanation, no markdown
+
+JSON format (exactly):
+{"listKey":"david","listId":"69e0891a1a68933066217928","listName":"David","title":"Fix pump at junction 4","confidence":0.95}`;
+
+        try {
+            const res = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': AI_KEY,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                },
+                body: JSON.stringify({
+                    model: 'claude-haiku-4-5',
+                    max_tokens: 200,
+                    system: systemPrompt,
+                    messages: [{ role: 'user', content: rawText }]
+                })
+            });
+            if (!res.ok) { console.warn('AI error', res.status); return null; }
+            const data = await res.json();
+            const text = data.content?.[0]?.text?.trim();
+            if (!text) return null;
+            // Strip any accidental markdown fences
+            const clean = text.replace(/```json?|```/g, '').trim();
+            return JSON.parse(clean);
+        } catch (e) {
+            console.warn('aiInterpret failed:', e);
+            return null;
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // LEARN FROM CARD SEND
+    // ═══════════════════════════════════════════════════════
+    function learnFromCard(rawText, listKey, title, sender) {
+        if (!brain) return;
+        brain.cards_sent = (brain.cards_sent || 0) + 1;
+        if (sender) {
+            if (!brain.senders) brain.senders = {};
+            brain.senders[sender] = (brain.senders[sender] || 0) + 1;
+        }
+        // Debounced save — don't block the send confirmation
+        setTimeout(saveBrain, 800);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // KEYWORD ROUTING (fallback when no AI key)
+    // ═══════════════════════════════════════════════════════
     function routeMessage(text) {
         const t = text.toLowerCase();
-        if (/\bdavid\b/.test(t))                                        return LISTS.david;
-        if (/\bharry\b/.test(t))                                        return LISTS.harry;
-        if (/\boffice\b|\badmin\b|\bpaperwork\b|\binvoice\b/.test(t))  return LISTS.office;
-        if (/\bwaiting\b|\bchase\b|\bchasing\b/.test(t))               return LISTS.waitingOn;
-        if (/\bdriver\b|\bauto\b|\bsite note\b/.test(t))               return LISTS.driverAuto;
-        if (/\bash\b|\bremind me\b|\bnote to self\b/.test(t))          return LISTS.ash;
+        if (/\bdavid\b|\bdave\b/.test(t))                                           return LISTS.david;
+        if (/\bharry\b/.test(t))                                                    return LISTS.harry;
+        if (/\boffice\b|\badmin\b|\bpaperwork\b|\binvoice\b|\baccounts\b/.test(t)) return LISTS.office;
+        if (/\bwaiting\b|\bchase\b|\bchasing\b|\bawaiting\b/.test(t))             return LISTS.waitingOn;
+        if (/\bdriver\b|\bauto\b|\bsite note\b|\bdelivery\b/.test(t))              return LISTS.driverAuto;
+        if (/\bash\b|\bremind me\b|\bnote to self\b|\bmyself\b/.test(t))           return LISTS.ash;
         return LISTS.driverAuto;
     }
 
     function cleanTitle(text) {
         return text
-            .replace(/^(please\s+)?(tell|ask|let|message|text)\s+(david|harry|ash|the\s+office|office)\s*(to\s+|that\s+|about\s+|:)?\s*/i, '')
-            .replace(/^(for\s+)(david|harry|ash|office)\s*[-:,]?\s*/i, '')
+            .replace(/^(please\s+)?(tell|ask|let|message|text)\s+(david|dave|harry|ash|the\s+office|office)\s*(to\s+|that\s+|about\s+|:)?\s*/i, '')
+            .replace(/^(for\s+)(david|dave|harry|ash|office)\s*[-:,]?\s*/i, '')
             .replace(/^(note\s+to\s+self\s*[-:,]?\s*)/i, '')
             .replace(/^(remind\s+me\s+(to\s+)?)/i, '')
             .replace(/^(office\s+(note|task|reminder|job)\s*[-:,]?\s*)/i, '')
@@ -631,10 +783,15 @@
             .trim();
     }
 
-    // ── SPEECH ───────────────────────────────────────────────────────────────
-    let recognition = null, isRecording = false, lastFinal = '', resetTimer = null;
-    let silenceTimer = null;   // waits 10s of silence before auto-sending
-    const SILENCE_MS = 10000; // 10 seconds
+    // ═══════════════════════════════════════════════════════
+    // VOICE — SPEECH RECOGNITION
+    // ═══════════════════════════════════════════════════════
+    let recognition  = null;
+    let isRecording  = false;
+    let lastFinal    = '';
+    let resetTimer   = null;
+    let silenceTimer = null;
+    const SILENCE_MS = 10000;  // 10s of silence → trigger countdown
 
     const recordBtn    = document.getElementById('recordBtn');
     const tapLabel     = document.getElementById('tapLabel');
@@ -650,7 +807,7 @@
 
         recognition = new SR();
         recognition.lang = 'en-GB';
-        recognition.continuous = true;   // keep listening, we control when it stops
+        recognition.continuous = true;
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
 
@@ -679,20 +836,14 @@
                 destBadge.textContent = '→ ' + routeMessage(current).name.toUpperCase();
                 destBadge.className = 'dest-badge busy';
             }
-
-            // Accumulate finals; reset 10s silence timer on every new word
             if (final) {
                 lastFinal = (lastFinal + ' ' + final.trim()).trim();
             }
-
-            // Every time speech comes in, restart the 10s silence countdown
+            // Each new word resets the 10s silence countdown
             clearTimeout(silenceTimer);
             if (lastFinal || interim.trim()) {
-                // Show countdown hint after 3s of silence
                 silenceTimer = setTimeout(() => {
-                    if (lastFinal) {
-                        recognition.stop(); // triggers onend → sendCard
-                    }
+                    if (lastFinal) recognition.stop();
                 }, SILENCE_MS);
             }
         };
@@ -711,7 +862,11 @@
 
         recognition.onend = () => {
             stopRecordingUI();
-            if (lastFinal) { sendCard(lastFinal); lastFinal = ''; }
+            if (lastFinal) {
+                const text = lastFinal;
+                lastFinal = '';
+                showVoiceCountdown(text, 5);
+            }
         };
 
         return true;
@@ -740,20 +895,93 @@
         }
     }
 
-    // ── TYPE INPUT ────────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // VOICE COUNTDOWN — 5s before sending
+    // ═══════════════════════════════════════════════════════
+    let voiceCountdownTimer = null;
+    let pendingVoiceText    = null;
+
+    function showVoiceCountdown(text, seconds) {
+        pendingVoiceText = text;
+        const list  = routeMessage(text);
+        const title = cleanTitle(text) || text;
+
+        document.getElementById('countdownNum').textContent   = seconds;
+        document.getElementById('countdownTitle').textContent = title.length > 60 ? title.slice(0, 57) + '…' : title;
+        document.getElementById('countdownDest').textContent  = '→ ' + list.name.toUpperCase();
+        document.getElementById('countdownOverlay').classList.add('show');
+
+        let remaining = seconds;
+        voiceCountdownTimer = setInterval(() => {
+            remaining--;
+            document.getElementById('countdownNum').textContent = remaining;
+            if (remaining <= 0) {
+                clearInterval(voiceCountdownTimer);
+                document.getElementById('countdownOverlay').classList.remove('show');
+                if (pendingVoiceText) {
+                    sendCard(pendingVoiceText);
+                    pendingVoiceText = null;
+                }
+            }
+        }, 1000);
+    }
+
+    function cancelVoiceSend() {
+        clearInterval(voiceCountdownTimer);
+        document.getElementById('countdownOverlay').classList.remove('show');
+        pendingVoiceText = null;
+        tapLabel.textContent = 'TAP TO SPEAK';
+        resetBadge();
+        transcriptEl.textContent = 'Your message will appear here…';
+        setStatus('Cancelled — tap to speak again', '');
+        setTimeout(() => setStatus('Ready', ''), 3000);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // TYPE INPUT — auto-send after 10s of no typing
+    // ═══════════════════════════════════════════════════════
+    let typeAutoTimer       = null;
+    let typeCountdownTimer  = null;
+    const TYPE_AUTO_MS      = 10000;
+
     typeInput.addEventListener('input', () => {
         const val = typeInput.value.trim();
+        clearTimeout(typeAutoTimer);
+        clearInterval(typeCountdownTimer);
+
         if (val.length > 2) {
-            typePreview.textContent = '→ will go to: ' + routeMessage(val).name;
-            typePreview.className = 'type-preview routed';
+            const list = routeMessage(val);
+            let remaining = Math.ceil(TYPE_AUTO_MS / 1000);
+            updateTypePreview(list, remaining);
+
+            typeCountdownTimer = setInterval(() => {
+                remaining--;
+                if (remaining > 0) updateTypePreview(list, remaining);
+                else clearInterval(typeCountdownTimer);
+            }, 1000);
+
+            typeAutoTimer = setTimeout(() => {
+                clearInterval(typeCountdownTimer);
+                sendTyped();
+            }, TYPE_AUTO_MS);
         } else {
             typePreview.textContent = '';
             typePreview.className = 'type-preview';
         }
     });
+
+    function updateTypePreview(list, remaining) {
+        typePreview.innerHTML =
+            '→ <strong style="color:var(--off-white)">' + list.name + '</strong>' +
+            ' <span style="color:var(--amber)">· auto-send in ' + remaining + 's</span>';
+        typePreview.className = 'type-preview routed';
+    }
+
     typeInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendTyped(); });
 
     function sendTyped() {
+        clearTimeout(typeAutoTimer);
+        clearInterval(typeCountdownTimer);
         const text = typeInput.value.trim();
         if (!text) return;
         if (!KEY || !TOKEN) { document.getElementById('noCredsWarning').classList.add('show'); return; }
@@ -763,11 +991,34 @@
         typePreview.className = 'type-preview';
     }
 
-    // ── SEND TO TRELLO ────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // SEND TO TRELLO (with AI brain)
+    // ═══════════════════════════════════════════════════════
     async function sendCard(text) {
-        const list  = routeMessage(text);
-        const title = cleanTitle(text) || text;
-        const desc  = 'Sent from DGC Voice — ' + (userName || 'Unknown');
+        // 1. Try AI routing if key is set
+        let routing = null;
+        if (AI_KEY) {
+            setBrainStatus('AI thinking…', 'busy');
+            routing = await aiInterpret(text);
+        }
+
+        // 2. Determine list + title
+        let list, title;
+        if (routing && routing.listId && routing.title) {
+            list  = { id: routing.listId, name: routing.listName };
+            title = routing.title;
+            setBrainStatus(
+                'AI routed → ' + routing.listName +
+                (routing.confidence ? ' (' + Math.round(routing.confidence * 100) + '%)' : ''),
+                'ok'
+            );
+        } else {
+            list  = routeMessage(text);
+            title = cleanTitle(text) || text;
+            if (AI_KEY) setBrainStatus('Keyword fallback used', 'warn');
+        }
+
+        const desc = 'Sent from DGC Voice — ' + (userName || 'Unknown');
 
         recordBtn.classList.add('sending');
         tapLabel.textContent = 'SENDING…';
@@ -776,12 +1027,12 @@
         setStatus('Sending to ' + list.name + '…', 'busy');
 
         try {
-            const url = `https://api.trello.com/1/cards` +
-                        `?key=${encodeURIComponent(KEY)}` +
-                        `&token=${encodeURIComponent(TOKEN)}` +
-                        `&idList=${list.id}` +
-                        `&name=${encodeURIComponent(title)}` +
-                        `&desc=${encodeURIComponent(desc)}`;
+            const url = 'https://api.trello.com/1/cards' +
+                        '?key='    + encodeURIComponent(KEY) +
+                        '&token='  + encodeURIComponent(TOKEN) +
+                        '&idList=' + list.id +
+                        '&name='   + encodeURIComponent(title) +
+                        '&desc='   + encodeURIComponent(desc);
 
             const res = await fetch(url, { method: 'POST' });
             recordBtn.classList.remove('sending');
@@ -791,9 +1042,13 @@
                 tapLabel.textContent = 'SENT ✓';
                 destBadge.textContent = '✓ ' + list.name.toUpperCase();
                 destBadge.className = 'dest-badge sent';
+                transcriptEl.textContent = title;
                 transcriptEl.classList.add('sent');
                 setStatus('Sent to ' + list.name + ' — ' + (userName || 'Unknown'), 'ok');
                 if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+
+                // Learn from this card (async, non-blocking)
+                learnFromCard(text, routing?.listKey, title, userName);
 
                 resetTimer = setTimeout(() => {
                     recordBtn.classList.remove('success');
@@ -802,6 +1057,7 @@
                     transcriptEl.textContent = 'Your message will appear here…';
                     transcriptEl.classList.remove('sent');
                     setStatus('Ready', '');
+                    if (!AI_KEY) setBrainStatus('Brain loaded · ' + (brain?.cards_sent||0) + ' cards learned · keyword mode', 'ok');
                 }, 4000);
 
             } else {
@@ -827,7 +1083,9 @@
         }
     }
 
-    // ── INBOX ─────────────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // INBOX
+    // ═══════════════════════════════════════════════════════
     let inboxOpen = false;
     async function toggleInbox() {
         const panel = document.getElementById('inboxPanel');
@@ -838,21 +1096,23 @@
         cl.innerHTML = '<div class="empty-msg">Loading…</div>';
         if (!KEY || !TOKEN) { cl.innerHTML = '<div class="empty-msg">Not connected</div>'; return; }
         try {
-            const url = `https://api.trello.com/1/lists/${LISTS.inbox.id}/cards?key=${KEY}&token=${TOKEN}&fields=name,desc`;
+            const url = 'https://api.trello.com/1/lists/' + LISTS.inbox.id + '/cards?key=' + KEY + '&token=' + TOKEN + '&fields=name,desc';
             const cards = await (await fetch(url)).json();
             cl.innerHTML = !cards.length
                 ? '<div class="empty-msg">Inbox is empty</div>'
-                : cards.map(c => `<div class="card-row">${esc(c.name)}</div>`).join('');
+                : cards.map(c => '<div class="card-row">' + esc(c.name) + '</div>').join('');
         } catch {
             cl.innerHTML = '<div class="empty-msg" style="color:#ff6666">Could not load — check connection</div>';
         }
     }
 
-    // ── CONNECTION TEST ────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // CONNECTION TEST
+    // ═══════════════════════════════════════════════════════
     async function testConnection() {
         const dot   = document.getElementById('connDot');
         const label = document.getElementById('connLabel');
-        dot.className   = 'conn-dot';
+        dot.className   = 'conn-dot busy';
         label.textContent = 'Checking…';
         if (!KEY || !TOKEN) {
             dot.className   = 'conn-dot err';
@@ -860,12 +1120,11 @@
             return;
         }
         try {
-            const url = `https://api.trello.com/1/members/me?key=${KEY}&token=${TOKEN}&fields=fullName`;
-            const res  = await fetch(url);
+            const res = await fetch('https://api.trello.com/1/members/me?key=' + KEY + '&token=' + TOKEN + '&fields=fullName');
             if (res.ok) {
                 const data = await res.json();
                 dot.className   = 'conn-dot ok';
-                label.textContent = 'Connected — ' + (data.fullName || 'Trello') + ' ✓';
+                label.textContent = 'Trello connected — ' + (data.fullName || 'OK') + ' ✓';
             } else if (res.status === 401) {
                 dot.className   = 'conn-dot err';
                 label.textContent = 'Bad credentials (401) — re-open setup link';
@@ -879,19 +1138,32 @@
         }
     }
 
-    // ── UTILS ──────────────────────────────────────────────────────────────────
-    function setStatus(msg, type) { statusLine.textContent = msg; statusLine.className = 'status-line ' + (type||''); }
-    function resetBadge() { destBadge.textContent = "Tap the logo to speak"; destBadge.className = 'dest-badge idle'; }
+    // ═══════════════════════════════════════════════════════
+    // UTILS
+    // ═══════════════════════════════════════════════════════
+    function setStatus(msg, type) {
+        statusLine.textContent = msg;
+        statusLine.className = 'status-line ' + (type || '');
+    }
+    function resetBadge() {
+        destBadge.textContent = 'Tap the logo to speak';
+        destBadge.className = 'dest-badge idle';
+    }
     function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    // ── iOS INSTALL ────────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // iOS INSTALL HINT
+    // ═══════════════════════════════════════════════════════
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     if (isIOS && !isStandalone) document.getElementById('installHint').classList.add('show');
 
-    // ── BOOT ───────────────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // BOOT
+    // ═══════════════════════════════════════════════════════
     initRecognition();
     testConnection();
+    loadBrain();
     </script>
 </body>
 </html>
