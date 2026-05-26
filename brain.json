@@ -3,38 +3,101 @@
   "company": "Drainage & Groundwork Contractors (DGC)",
   "site": "Dandara B4, Ballasalla, Isle of Man",
   "staff": [
-    { "name": "David",      "listKey": "david",      "listId": "69e0891a1a68933066217928", "triggers": ["david", "dave"] },
-    { "name": "Harry",      "listKey": "harry",      "listId": "69e08917630118377a4df08b", "triggers": ["harry"] },
-    { "name": "Ash",        "listKey": "ash",        "listId": "69e08915e048bd2bcf495cbc", "triggers": ["ash", "me", "myself", "remind me", "note to self"] },
-    { "name": "Office",     "listKey": "office",     "listId": "69fa03a81573baa57b052eee", "triggers": ["office", "admin", "invoice", "paperwork", "accounts"] },
-    { "name": "Waiting On", "listKey": "waitingOn",  "listId": "69e089ac29710e177f5e372d", "triggers": ["waiting", "wait", "chase", "chasing", "chased", "awaiting"] },
-    { "name": "Driver Auto","listKey": "driverAuto", "listId": "69e677fea19d02ddd525051c", "triggers": ["driver", "auto", "site", "delivery", "vehicle", "van"] }
+    {
+      "name": "David",
+      "listKey": "david",
+      "listId": "69e0891a1a68933066217928",
+      "triggers": [
+        "david",
+        "dave"
+      ]
+    },
+    {
+      "name": "Harry",
+      "listKey": "harry",
+      "listId": "69e08917630118377a4df08b",
+      "triggers": [
+        "harry"
+      ]
+    },
+    {
+      "name": "Ash",
+      "listKey": "ash",
+      "listId": "69e08915e048bd2bcf495cbc",
+      "triggers": [
+        "ash",
+        "me",
+        "myself",
+        "remind me",
+        "note to self"
+      ]
+    },
+    {
+      "name": "Office",
+      "listKey": "office",
+      "listId": "69fa03a81573baa57b052eee",
+      "triggers": [
+        "office",
+        "admin",
+        "invoice",
+        "paperwork",
+        "accounts"
+      ]
+    },
+    {
+      "name": "Waiting On",
+      "listKey": "waitingOn",
+      "listId": "69e089ac29710e177f5e372d",
+      "triggers": [
+        "waiting",
+        "wait",
+        "chase",
+        "chasing",
+        "chased",
+        "awaiting"
+      ]
+    },
+    {
+      "name": "Driver Auto",
+      "listKey": "driverAuto",
+      "listId": "69e677fea19d02ddd525051c",
+      "triggers": [
+        "driver",
+        "auto",
+        "site",
+        "delivery",
+        "vehicle",
+        "van"
+      ]
+    }
   ],
   "vocab": {
-    "b4":          "B4",
-    "dandara":     "Dandara",
-    "ballasalla":  "Ballasalla",
-    "shuttering":  "shuttering",
-    "laxey":       "Laxey",
-    "dgc":         "DGC",
-    "blockwork":   "blockwork",
-    "groundwork":  "groundwork",
-    "drainage":    "drainage",
-    "manholes":    "manholes",
-    "manhole":     "manhole",
-    "gully":       "gully",
-    "gulley":      "gully",
-    "kerb":        "kerb",
-    "aco":         "ACO",
-    "sop":         "SOP",
-    "ppe":         "PPE",
-    "ram":         "RAM",
-    "jcb":         "JCB",
-    "hiab":        "HIAB",
+    "b4": "B4",
+    "dandara": "Dandara",
+    "ballasalla": "Ballasalla",
+    "shuttering": "shuttering",
+    "laxey": "Laxey",
+    "dgc": "DGC",
+    "blockwork": "blockwork",
+    "groundwork": "groundwork",
+    "drainage": "drainage",
+    "manholes": "manholes",
+    "manhole": "manhole",
+    "gully": "gully",
+    "gulley": "gully",
+    "kerb": "kerb",
+    "aco": "ACO",
+    "sop": "SOP",
+    "ppe": "PPE",
+    "ram": "RAM",
+    "jcb": "JCB",
+    "hiab": "HIAB",
     "telehandler": "telehandler",
-    "formwork":    "formwork"
+    "formwork": "formwork"
   },
   "corrections": [],
-  "cards_sent": 0,
-  "senders": {}
+  "cards_sent": 1,
+  "senders": {
+    "Ash": 1
+  }
 }
