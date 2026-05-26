@@ -633,6 +633,8 @@
 
     // ── SPEECH ───────────────────────────────────────────────────────────────
     let recognition = null, isRecording = false, lastFinal = '', resetTimer = null;
+    let silenceTimer = null;   // waits 10s of silence before auto-sending
+    const SILENCE_MS = 10000; // 10 seconds
 
     const recordBtn    = document.getElementById('recordBtn');
     const tapLabel     = document.getElementById('tapLabel');
@@ -648,7 +650,7 @@
 
         recognition = new SR();
         recognition.lang = 'en-GB';
-        recognition.continuous = false;
+        recognition.continuous = true;   // keep listening, we control when it stops
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
 
@@ -677,7 +679,22 @@
                 destBadge.textContent = '→ ' + routeMessage(current).name.toUpperCase();
                 destBadge.className = 'dest-badge busy';
             }
-            if (final) { lastFinal = final.trim(); recognition.stop(); }
+
+            // Accumulate finals; reset 10s silence timer on every new word
+            if (final) {
+                lastFinal = (lastFinal + ' ' + final.trim()).trim();
+            }
+
+            // Every time speech comes in, restart the 10s silence countdown
+            clearTimeout(silenceTimer);
+            if (lastFinal || interim.trim()) {
+                // Show countdown hint after 3s of silence
+                silenceTimer = setTimeout(() => {
+                    if (lastFinal) {
+                        recognition.stop(); // triggers onend → sendCard
+                    }
+                }, SILENCE_MS);
+            }
         };
 
         recognition.onerror = (e) => {
@@ -702,6 +719,7 @@
 
     function stopRecordingUI() {
         isRecording = false;
+        clearTimeout(silenceTimer);
         recordBtn.classList.remove('recording');
         tapLabel.textContent = 'TAP TO SPEAK';
         transcriptEl.classList.remove('active');
@@ -709,7 +727,11 @@
 
     function toggleRecord() {
         if (!KEY || !TOKEN) { document.getElementById('noCredsWarning').classList.add('show'); return; }
-        if (isRecording) { recognition && recognition.stop(); return; }
+        if (isRecording) {
+            clearTimeout(silenceTimer);
+            recognition && recognition.stop();
+            return;
+        }
         lastFinal = '';
         if (!recognition && !initRecognition()) return;
         try { recognition.start(); } catch {
