@@ -206,6 +206,7 @@
             transition: transform 0.12s ease; outline: none;
         }
         .logo-btn:active { transform: scale(0.93); }
+        .logo-btn.error-state .logo-img { filter: brightness(0) invert(1) drop-shadow(0 0 14px rgba(255,60,60,1)); }
 
         .logo-img {
             width: 260px; height: auto; max-height: 160px;
@@ -334,6 +335,25 @@
         .install-hint.show { display: block; }
         .install-hint strong { color: #888; }
 
+        /* ── CONNECTION STATUS BAR ── */
+        #connBar {
+            width: 100%; max-width: 440px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 10px; padding: 9px 14px; margin-bottom: 8px;
+            font-size: 0.75rem;
+        }
+        .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+        .conn-dot.ok  { background: var(--green); }
+        .conn-dot.err { background: #ff4444; }
+        .conn-label { color: var(--muted); flex: 1; margin-left: 8px; }
+        .conn-test-btn {
+            background: none; border: 1px solid var(--border); border-radius: 6px;
+            padding: 3px 10px; font-size: 0.7rem; color: var(--muted);
+            cursor: pointer; transition: border-color 0.2s, color 0.2s;
+        }
+        .conn-test-btn:active { border-color: var(--blue); color: var(--blue); }
+
         /* ── NO CREDS WARNING ── */
         #noCredsWarning {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85);
@@ -400,6 +420,13 @@
                 Set Up Credentials
             </button>
         </div>
+    </div>
+
+    <!-- ── CONNECTION BAR ── -->
+    <div id="connBar">
+        <div class="conn-dot" id="connDot"></div>
+        <span class="conn-label" id="connLabel">Checking connection…</span>
+        <button class="conn-test-btn" onclick="testConnection()">Test</button>
     </div>
 
     <!-- ── HEADER ── -->
@@ -720,13 +747,24 @@
                     setStatus('Ready', '');
                 }, 4000);
             } else {
-                setStatus('Trello error ' + res.status, 'error');
-                resetBadge(); tapLabel.textContent = 'TAP TO SPEAK';
+                recordBtn.classList.add('error-state');
+                tapLabel.textContent = 'TAP TO SPEAK';
+                if (res.status === 401) {
+                    setStatus('Not authorised — open setup link again', 'error');
+                    document.getElementById('noCredsWarning').classList.add('show');
+                } else if (res.status === 400) {
+                    setStatus('Bad request (400) — card title may be empty', 'error');
+                } else {
+                    const body = await res.text().catch(() => '');
+                    setStatus('Trello error ' + res.status + (body ? ': ' + body.slice(0,60) : ''), 'error');
+                }
+                resetBadge();
+                setTimeout(() => recordBtn.classList.remove('error-state'), 3000);
             }
-        } catch {
+        } catch (err) {
             recordBtn.classList.remove('sending');
             tapLabel.textContent = 'TAP TO SPEAK';
-            setStatus('Network error — check signal', 'error');
+            setStatus('Network error — check signal (' + (err.message || 'fetch failed') + ')', 'error');
             resetBadge();
         }
     }
@@ -757,12 +795,46 @@
     function resetBadge() { destBadge.textContent = "Tap your logo to speak"; destBadge.className = 'dest-badge idle'; }
     function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+    // ── CONNECTION TEST ───────────────────────────────────────────────────────
+    async function testConnection() {
+        const dot   = document.getElementById('connDot');
+        const label = document.getElementById('connLabel');
+        dot.className   = 'conn-dot';
+        label.textContent = 'Testing…';
+
+        if (!KEY || !TOKEN) {
+            dot.className   = 'conn-dot err';
+            label.textContent = 'No credentials — open setup link';
+            return;
+        }
+
+        try {
+            const url = `https://api.trello.com/1/members/me?key=${KEY}&token=${TOKEN}&fields=fullName`;
+            const res  = await fetch(url);
+            if (res.ok) {
+                const data = await res.json();
+                dot.className   = 'conn-dot ok';
+                label.textContent = 'Connected as ' + (data.fullName || 'Trello user') + ' ✓';
+            } else if (res.status === 401) {
+                dot.className   = 'conn-dot err';
+                label.textContent = 'Wrong credentials (401) — re-open setup link';
+            } else {
+                dot.className   = 'conn-dot err';
+                label.textContent = 'Trello error ' + res.status;
+            }
+        } catch (e) {
+            dot.className   = 'conn-dot err';
+            label.textContent = 'No internet — check signal';
+        }
+    }
+
     // ── iOS INSTALL ───────────────────────────────────────────────────────────
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     if (isIOS && !isStandalone) document.getElementById('installHint').classList.add('show');
 
     initRecognition();
+    testConnection();
     </script>
 </body>
 </html>
