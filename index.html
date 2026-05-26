@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DGC Voice">
+    <meta name="theme-color" content="#0a0a0a">
+    <title>DGC Voice</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --red:    #d90000;
+            --green:  #00c853;
+            --blue:   #2979ff;
+            --bg:     #0a0a0a;
+            --surface:#161616;
+            --border: #242424;
+            --text:   #ffffff;
+            --muted:  #555;
+        }
+
+        html, body { height: 100%; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: max(env(safe-area-inset-top), 14px) 16px max(env(safe-area-inset-bottom), 14px);
+            overflow-x: hidden;
+        }
+
+        /* ── SETUP OVERLAY (name + optional credentials) ── */
+        #setupOverlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+            gap: 18px;
+            overflow-y: auto;
+        }
+        #setupOverlay.hidden { display: none; }
+
+        .setup-logo {
+            width: 180px; height: auto; max-height: 130px;
+            object-fit: contain; margin-bottom: 4px;
+        }
+
+        .setup-wordmark {
+            font-size: 2.6rem; font-weight: 900;
+            letter-spacing: 6px; color: var(--text);
+            display: none;
+        }
+
+        .setup-title {
+            font-size: 1.3rem; font-weight: 800;
+            letter-spacing: 2px; text-align: center;
+        }
+
+        .setup-sub {
+            font-size: 0.85rem; color: var(--muted);
+            text-align: center; line-height: 1.6; max-width: 300px;
+        }
+
+        .setup-input {
+            width: 100%; max-width: 320px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 15px 18px;
+            font-size: 1rem; color: var(--text);
+            font-family: inherit; outline: none;
+            text-align: center; -webkit-appearance: none;
+            transition: border-color 0.2s;
+        }
+        .setup-input::placeholder { color: var(--muted); }
+        .setup-input:focus { border-color: var(--red); }
+
+        .setup-input.small {
+            font-size: 0.78rem; text-align: left; padding: 12px 14px;
+        }
+
+        .setup-label {
+            width: 100%; max-width: 320px;
+            font-size: 0.7rem; color: var(--muted);
+            letter-spacing: 1px; text-transform: uppercase;
+            align-self: flex-start;
+            margin-left: calc(50% - 160px);
+        }
+
+        .setup-btn {
+            width: 100%; max-width: 320px;
+            background: var(--red); border: none;
+            border-radius: 14px; padding: 15px;
+            font-size: 0.9rem; font-weight: 800;
+            letter-spacing: 2px; color: white;
+            cursor: pointer; transition: background 0.2s, transform 0.1s;
+        }
+        .setup-btn:active { background: #aa0000; transform: scale(0.97); }
+
+        .setup-divider {
+            width: 100%; max-width: 320px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .setup-divider::before, .setup-divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--border);
+        }
+        .setup-divider span { font-size: 0.65rem; color: var(--muted); letter-spacing: 2px; }
+
+        .creds-toggle {
+            font-size: 0.75rem; color: var(--muted);
+            cursor: pointer; text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        #credsSection { display: none; width: 100%; max-width: 320px; gap: 8px; flex-direction: column; }
+        #credsSection.show { display: flex; }
+
+        /* ── HEADER ── */
+        header {
+            width: 100%; max-width: 440px;
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 4px 0 10px;
+        }
+
+        .user-chip {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 20px; padding: 7px 14px;
+            font-size: 0.78rem; color: #aaa;
+            cursor: pointer; transition: border-color 0.2s;
+        }
+        .user-chip:active { border-color: var(--red); }
+        .user-chip .dot {
+            width: 7px; height: 7px; background: var(--green);
+            border-radius: 50%; flex-shrink: 0;
+        }
+
+        .inbox-btn {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 20px; padding: 7px 16px;
+            font-size: 0.78rem; font-weight: 600; color: #aaa;
+            cursor: pointer; transition: border-color 0.2s, color 0.2s;
+        }
+        .inbox-btn:active { border-color: var(--blue); color: var(--blue); }
+
+        /* ── INBOX ── */
+        #inboxPanel {
+            display: none; width: 100%; max-width: 440px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden; margin-bottom: 12px;
+        }
+        .inbox-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px; border-bottom: 1px solid var(--border);
+        }
+        .inbox-header h3 { font-size: 0.82rem; font-weight: 700; letter-spacing: 1.5px; }
+        .close-inbox {
+            background: none; border: none; color: var(--muted);
+            font-size: 1.1rem; cursor: pointer; padding: 2px 6px;
+        }
+        .cards-list { padding: 6px; max-height: 200px; overflow-y: auto; }
+        .card-row {
+            padding: 10px; font-size: 0.83rem; color: #ccc;
+            border-bottom: 1px solid var(--border); line-height: 1.4;
+        }
+        .card-row:last-child { border-bottom: none; }
+        .empty-msg { text-align: center; color: var(--muted); padding: 18px; font-size: 0.83rem; }
+
+        /* ── MAIN ── */
+        .main {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 22px; width: 100%; max-width: 440px; padding: 8px 0;
+        }
+
+        .dest-badge {
+            font-size: 0.92rem; font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase;
+            min-height: 22px; text-align: center; transition: color 0.2s;
+        }
+        .dest-badge.idle  { color: var(--muted); font-weight: 400; font-size: 0.78rem; }
+        .dest-badge.busy  { color: var(--blue); }
+        .dest-badge.sent  { color: var(--green); }
+        .dest-badge.error { color: #ff4444; }
+
+        /* ── LOGO BUTTON ── */
+        .logo-btn {
+            position: relative; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 24px; padding: 18px 24px;
+            touch-action: manipulation; border: none; background: none;
+            transition: transform 0.12s ease; outline: none;
+        }
+        .logo-btn:active { transform: scale(0.93); }
+
+        .logo-img {
+            width: 260px; height: auto; max-height: 160px;
+            object-fit: contain; pointer-events: none; display: block;
+            filter: brightness(0) invert(1);
+            transition: filter 0.3s ease;
+        }
+
+        /* Fallback wordmark when logo image fails */
+        .logo-fallback {
+            display: none;
+            font-size: 3.5rem; font-weight: 900;
+            letter-spacing: 8px; color: white;
+            pointer-events: none;
+        }
+
+        .logo-btn.recording .logo-img {
+            filter: brightness(0) invert(1) drop-shadow(0 0 14px rgba(220,20,20,1)) drop-shadow(0 0 35px rgba(220,20,20,0.6));
+            animation: logo-pulse 1.3s ease-in-out infinite;
+        }
+        .logo-btn.recording .logo-fallback {
+            text-shadow: 0 0 14px rgba(220,20,20,1), 0 0 35px rgba(220,20,20,0.6);
+            animation: logo-pulse-text 1.3s ease-in-out infinite;
+        }
+        .logo-btn.sending .logo-img {
+            filter: brightness(0) invert(1) drop-shadow(0 0 14px rgba(41,121,255,1)) drop-shadow(0 0 35px rgba(41,121,255,0.6));
+            animation: none;
+        }
+        .logo-btn.success .logo-img {
+            filter: brightness(0) invert(1) drop-shadow(0 0 16px rgba(0,200,83,1)) drop-shadow(0 0 35px rgba(0,200,83,0.6));
+            animation: none;
+        }
+
+        @keyframes logo-pulse {
+            0%, 100% { filter: brightness(0) invert(1) drop-shadow(0 0 6px rgba(220,20,20,0.7)); }
+            50%       { filter: brightness(0) invert(1) drop-shadow(0 0 28px rgba(220,20,20,1)) drop-shadow(0 0 55px rgba(220,20,20,0.55)); }
+        }
+        @keyframes logo-pulse-text {
+            0%, 100% { text-shadow: 0 0 6px rgba(220,20,20,0.7); }
+            50%       { text-shadow: 0 0 28px rgba(220,20,20,1), 0 0 55px rgba(220,20,20,0.55); }
+        }
+
+        .tap-label {
+            position: absolute; bottom: -4px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.62rem; font-weight: 700;
+            letter-spacing: 3px; color: var(--muted);
+            text-transform: uppercase; white-space: nowrap;
+            pointer-events: none;
+        }
+
+        /* ── TRANSCRIPT ── */
+        .transcript {
+            width: 100%; min-height: 62px;
+            background: var(--surface); border: 1.5px solid var(--border);
+            border-radius: 14px; padding: 14px 16px;
+            font-size: 0.95rem; line-height: 1.55;
+            color: var(--muted); text-align: center;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .transcript.active { border-color: var(--red); color: var(--text); }
+        .transcript.sent   { border-color: var(--green); color: #777; }
+
+        .status-line {
+            font-size: 0.8rem; color: var(--muted);
+            text-align: center; min-height: 18px;
+        }
+        .status-line.error { color: #ff4444; }
+        .status-line.ok    { color: var(--green); font-weight: 600; }
+        .status-line.busy  { color: var(--blue); }
+
+        /* ── TYPE SECTION ── */
+        .or-divider {
+            width: 100%; max-width: 440px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .or-divider span { font-size: 0.68rem; color: var(--muted); letter-spacing: 2px; font-weight: 600; }
+
+        .type-section {
+            width: 100%; max-width: 440px;
+            display: flex; flex-direction: column; gap: 8px; padding-bottom: 6px;
+        }
+        .type-preview { font-size: 0.73rem; color: var(--muted); padding: 0 4px; min-height: 16px; }
+        .type-preview.routed { color: var(--blue); }
+        .type-row { display: flex; gap: 8px; }
+
+        .type-input {
+            flex: 1; background: var(--surface);
+            border: 1.5px solid var(--border); border-radius: 12px;
+            padding: 12px 14px; font-size: 0.9rem; color: var(--text);
+            font-family: inherit; outline: none; -webkit-appearance: none;
+            transition: border-color 0.2s;
+        }
+        .type-input::placeholder { color: var(--muted); }
+        .type-input:focus { border-color: var(--red); }
+
+        .send-btn {
+            background: var(--red); border: none; border-radius: 12px;
+            padding: 12px 18px; font-size: 0.8rem; font-weight: 800;
+            letter-spacing: 1px; color: white; cursor: pointer;
+            touch-action: manipulation; transition: background 0.15s, transform 0.1s;
+        }
+        .send-btn:active { background: #aa0000; transform: scale(0.96); }
+
+        /* ── HINTS ── */
+        .hints {
+            width: 100%; max-width: 440px;
+            display: flex; gap: 6px; flex-wrap: wrap;
+            justify-content: center; padding: 4px 0 8px;
+        }
+        .hint-pill {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 20px; padding: 4px 10px;
+            font-size: 0.66rem; color: var(--muted);
+        }
+
+        /* ── iOS INSTALL ── */
+        .install-hint {
+            width: 100%; max-width: 440px;
+            background: #111; border: 1px solid var(--border);
+            border-radius: 10px; padding: 9px 14px;
+            font-size: 0.7rem; color: var(--muted);
+            text-align: center; margin-bottom: 4px; display: none;
+        }
+        .install-hint.show { display: block; }
+        .install-hint strong { color: #888; }
+
+        /* ── NO CREDS WARNING ── */
+        #noCredsWarning {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            z-index: 50; display: none; align-items: center;
+            justify-content: center; padding: 24px;
+        }
+        #noCredsWarning.show { display: flex; }
+        .warning-box {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 28px 24px; max-width: 360px;
+            text-align: center; display: flex; flex-direction: column; gap: 14px;
+        }
+        .warning-box h3 { font-size: 1rem; font-weight: 700; }
+        .warning-box p { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+        .warning-box button {
+            background: var(--red); border: none; border-radius: 10px;
+            padding: 12px; font-size: 0.85rem; font-weight: 700;
+            color: white; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── SETUP OVERLAY ── -->
+    <div id="setupOverlay">
+        <img class="setup-logo" src="logo-white.png" alt="DGC"
+             onerror="this.style.display='none'; document.querySelector('.setup-wordmark').style.display='block'">
+        <div class="setup-wordmark">DGC</div>
+        <div class="setup-title">DGC VOICE</div>
+        <div class="setup-sub">What's your name? Your Trello cards will be signed so everyone knows who sent them.</div>
+
+        <input class="setup-input" id="setupNameInput" type="text"
+               placeholder="Your name (e.g. Ash, Harry…)"
+               autocomplete="given-name" autocorrect="off"
+               spellcheck="false" maxlength="40">
+
+        <button class="setup-btn" onclick="saveName()">START</button>
+
+        <div class="setup-divider"><span>FIRST TIME ONLY</span></div>
+
+        <div class="creds-toggle" onclick="toggleCreds()">
+            ⚙ Set up Trello connection
+        </div>
+
+        <div id="credsSection">
+            <div class="setup-label">Trello API Key</div>
+            <input class="setup-input small" id="setupKey" type="text"
+                   placeholder="Trello API Key" autocorrect="off" spellcheck="false">
+            <div class="setup-label">Trello Token</div>
+            <input class="setup-input small" id="setupToken" type="password"
+                   placeholder="Trello Token" autocorrect="off" spellcheck="false">
+            <div class="setup-label">List IDs (comma-separated: Inbox,Ash,Harry,David,Driver Auto,Office,Waiting On)</div>
+            <input class="setup-input small" id="setupLists" type="text"
+                   placeholder="Leave blank to use defaults" autocorrect="off" spellcheck="false">
+        </div>
+    </div>
+
+    <!-- ── NO CREDS WARNING ── -->
+    <div id="noCredsWarning">
+        <div class="warning-box">
+            <h3>Not Connected</h3>
+            <p>This app needs Trello credentials to work.<br>Ask your admin for the setup link, or tap below to enter them manually.</p>
+            <button onclick="document.getElementById('noCredsWarning').classList.remove('show'); document.getElementById('setupOverlay').classList.remove('hidden'); toggleCreds();">
+                Set Up Credentials
+            </button>
+        </div>
+    </div>
+
+    <!-- ── HEADER ── -->
+    <header>
+        <div class="user-chip" onclick="changeName()" title="Tap to change name">
+            <div class="dot"></div>
+            <span id="userChipName">You</span>
+        </div>
+        <button class="inbox-btn" onclick="toggleInbox()">📋 Inbox</button>
+    </header>
+
+    <!-- ── INBOX ── -->
+    <div id="inboxPanel">
+        <div class="inbox-header">
+            <h3>INBOX</h3>
+            <button class="close-inbox" onclick="toggleInbox()">✕</button>
+        </div>
+        <div class="cards-list" id="cardsList">
+            <div class="empty-msg">Loading…</div>
+        </div>
+    </div>
+
+    <!-- ── MAIN ── -->
+    <div class="main">
+        <div class="dest-badge idle" id="destBadge">Tap your logo to speak</div>
+
+        <button class="logo-btn" id="recordBtn" onclick="toggleRecord()">
+            <img class="logo-img" id="logoImg"
+                 src="logo-white.png" alt="DGC"
+                 onerror="this.style.display='none'; document.querySelector('.logo-fallback').style.display='block'">
+            <div class="logo-fallback">DGC</div>
+            <span class="tap-label" id="tapLabel">TAP TO SPEAK</span>
+        </button>
+
+        <div class="transcript" id="transcript">Your message will appear here…</div>
+        <div class="status-line" id="statusLine">Ready</div>
+    </div>
+
+    <!-- ── TYPE SECTION ── -->
+    <div class="or-divider"><span>OR TYPE BELOW</span></div>
+
+    <div class="type-section">
+        <div class="type-preview" id="typePreview"></div>
+        <div class="type-row">
+            <input class="type-input" id="typeInput" type="text"
+                   placeholder='"Tell David pump is broken"'
+                   autocomplete="off" autocorrect="off" spellcheck="false">
+            <button class="send-btn" onclick="sendTyped()">SEND</button>
+        </div>
+    </div>
+
+    <div class="hints">
+        <div class="hint-pill">"Tell David…"</div>
+        <div class="hint-pill">"Tell Harry…"</div>
+        <div class="hint-pill">"Office note…"</div>
+        <div class="hint-pill">"Remind me…"</div>
+        <div class="hint-pill">"Waiting on…"</div>
+    </div>
+
+    <div class="install-hint" id="installHint">
+        <strong>Add to Home Screen:</strong> tap Share → Add to Home Screen
+    </div>
+
+    <script>
+    // ── DEFAULT TRELLO CONFIG ────────────────────────────────────────────────
+    // Credentials are loaded from localStorage (set via setup link or manual setup)
+    // Never hardcoded here so this file is safe to share publicly.
+    const DEFAULT_LISTS = {
+        inbox:      { id: '69e08912903083aefd9de48f', name: 'Inbox' },
+        ash:        { id: '69e08915e048bd2bcf495cbc', name: 'Ash' },
+        harry:      { id: '69e08917630118377a4df08b', name: 'Harry' },
+        david:      { id: '69e0891a1a68933066217928', name: 'David' },
+        driverAuto: { id: '69e677fea19d02ddd525051c', name: 'Driver Auto' },
+        office:     { id: '69fa03a81573baa57b052eee', name: 'Office' },
+        waitingOn:  { id: '69e089ac29710e177f5e372d', name: 'Waiting On' },
+    };
+
+    // ── LOAD CONFIG FROM URL PARAMS (setup link) OR LOCALSTORAGE ────────────
+    // Ash can share: https://ashuraziztax-ux.github.io/dgc-voice/?k=KEY&t=TOKEN
+    // Anyone opening that link gets auto-configured and the params are cleared.
+    (function applySetupLink() {
+        const p = new URLSearchParams(location.search);
+        if (p.get('k')) localStorage.setItem('dgcKey',   p.get('k'));
+        if (p.get('t')) localStorage.setItem('dgcToken', p.get('t'));
+        if (p.get('k') || p.get('t')) {
+            // Clear credentials from the URL bar (so they're not visible/shared)
+            history.replaceState({}, '', location.pathname);
+        }
+    })();
+
+    let KEY   = localStorage.getItem('dgcKey')   || '';
+    let TOKEN = localStorage.getItem('dgcToken') || '';
+    let LISTS = DEFAULT_LISTS;
+
+    // ── USER NAME ────────────────────────────────────────────────────────────
+    let userName = localStorage.getItem('dgcVoiceUser') || '';
+
+    function saveName() {
+        const val = document.getElementById('setupNameInput').value.trim();
+        if (!val) { document.getElementById('setupNameInput').focus(); return; }
+        userName = val;
+        localStorage.setItem('dgcVoiceUser', userName);
+
+        // Save any manually entered credentials
+        const k = document.getElementById('setupKey').value.trim();
+        const t = document.getElementById('setupToken').value.trim();
+        if (k) { KEY = k; localStorage.setItem('dgcKey', k); }
+        if (t) { TOKEN = t; localStorage.setItem('dgcToken', t); }
+
+        document.getElementById('setupOverlay').classList.add('hidden');
+        document.getElementById('userChipName').textContent = userName;
+
+        if (!KEY || !TOKEN) {
+            document.getElementById('noCredsWarning').classList.add('show');
+        }
+    }
+
+    function changeName() {
+        document.getElementById('setupNameInput').value = userName;
+        document.getElementById('setupOverlay').classList.remove('hidden');
+        setTimeout(() => document.getElementById('setupNameInput').focus(), 100);
+    }
+
+    function toggleCreds() {
+        const sec = document.getElementById('credsSection');
+        sec.classList.toggle('show');
+        if (sec.classList.contains('show')) {
+            document.getElementById('setupKey').value   = KEY;
+            document.getElementById('setupToken').value = TOKEN;
+        }
+    }
+
+    // Show setup if no name; skip if name already set
+    if (userName) {
+        document.getElementById('setupOverlay').classList.add('hidden');
+        document.getElementById('userChipName').textContent = userName;
+        if (!KEY || !TOKEN) {
+            document.getElementById('noCredsWarning').classList.add('show');
+        }
+    }
+
+    document.getElementById('setupNameInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') saveName();
+    });
+
+    // ── ROUTING ──────────────────────────────────────────────────────────────
+    function routeMessage(text) {
+        const t = text.toLowerCase();
+        if (/\bdavid\b/.test(t))                                       return LISTS.david;
+        if (/\bharry\b/.test(t))                                       return LISTS.harry;
+        if (/\boffice\b|\badmin\b|\bpaperwork\b|\binvoice\b/.test(t)) return LISTS.office;
+        if (/\bwaiting\b|\bchase\b|\bchasing\b/.test(t))              return LISTS.waitingOn;
+        if (/\bdriver\b|\bauto\b|\bsite note\b/.test(t))              return LISTS.driverAuto;
+        if (/\bash\b|\bremind me\b|\bnote to self\b/.test(t))         return LISTS.ash;
+        return LISTS.driverAuto;
+    }
+
+    function cleanTitle(text) {
+        return text
+            .replace(/^(please\s+)?(tell|ask|let|message|text)\s+(david|harry|ash|the\s+office|office)\s*(to\s+|that\s+|about\s+|:)?\s*/i, '')
+            .replace(/^(for\s+)(david|harry|ash|office)\s*[-:,]?\s*/i, '')
+            .replace(/^(note\s+to\s+self\s*[-:,]?\s*)/i, '')
+            .replace(/^(remind\s+me\s+(to\s+)?)/i, '')
+            .replace(/^(office\s+(note|task|reminder|job)\s*[-:,]?\s*)/i, '')
+            .replace(/^(waiting\s+on\s+)/i, 'Waiting on: ')
+            .replace(/^(chasing?\s+)/i, 'Chasing: ')
+            .trim();
+    }
+
+    // ── SPEECH ───────────────────────────────────────────────────────────────
+    let recognition = null, isRecording = false, lastFinal = '', resetTimer = null;
+
+    const recordBtn    = document.getElementById('recordBtn');
+    const tapLabel     = document.getElementById('tapLabel');
+    const transcriptEl = document.getElementById('transcript');
+    const statusLine   = document.getElementById('statusLine');
+    const destBadge    = document.getElementById('destBadge');
+    const typeInput    = document.getElementById('typeInput');
+    const typePreview  = document.getElementById('typePreview');
+
+    function initRecognition() {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) { setStatus('Speech not available — use the text box below', 'error'); return false; }
+
+        recognition = new SR();
+        recognition.lang = 'en-GB';
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+            isRecording = true;
+            recordBtn.classList.add('recording');
+            tapLabel.textContent = 'LISTENING…';
+            transcriptEl.textContent = '…';
+            transcriptEl.classList.add('active');
+            transcriptEl.classList.remove('sent');
+            destBadge.textContent = 'Listening…';
+            destBadge.className = 'dest-badge busy';
+            setStatus('', '');
+            clearTimeout(resetTimer);
+        };
+
+        recognition.onresult = (e) => {
+            let interim = '', final = '';
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                const t = e.results[i][0].transcript;
+                if (e.results[i].isFinal) final += t; else interim += t;
+            }
+            const current = final || interim;
+            transcriptEl.textContent = current;
+            if (current.trim().length > 2) {
+                destBadge.textContent = '→ ' + routeMessage(current).name.toUpperCase();
+                destBadge.className = 'dest-badge busy';
+            }
+            if (final) { lastFinal = final.trim(); recognition.stop(); }
+        };
+
+        recognition.onerror = (e) => {
+            stopRecordingUI();
+            const msgs = {
+                'no-speech':    'Nothing heard — try again or type below',
+                'not-allowed':  'Microphone blocked — check browser permissions',
+                'audio-capture':'No microphone found',
+                'network':      'Network error — check signal',
+            };
+            setStatus(msgs[e.error] || 'Error: ' + e.error, 'error');
+            resetBadge();
+        };
+
+        recognition.onend = () => {
+            stopRecordingUI();
+            if (lastFinal) { sendCard(lastFinal); lastFinal = ''; }
+        };
+
+        return true;
+    }
+
+    function stopRecordingUI() {
+        isRecording = false;
+        recordBtn.classList.remove('recording');
+        tapLabel.textContent = 'TAP TO SPEAK';
+        transcriptEl.classList.remove('active');
+    }
+
+    function toggleRecord() {
+        if (!KEY || !TOKEN) { document.getElementById('noCredsWarning').classList.add('show'); return; }
+        if (isRecording) { recognition && recognition.stop(); return; }
+        lastFinal = '';
+        if (!recognition && !initRecognition()) return;
+        try { recognition.start(); } catch {
+            recognition = null;
+            if (initRecognition()) recognition.start();
+        }
+    }
+
+    // ── TYPE INPUT ────────────────────────────────────────────────────────────
+    typeInput.addEventListener('input', () => {
+        const val = typeInput.value.trim();
+        if (val.length > 2) {
+            typePreview.textContent = '→ will go to: ' + routeMessage(val).name;
+            typePreview.className = 'type-preview routed';
+        } else {
+            typePreview.textContent = '';
+            typePreview.className = 'type-preview';
+        }
+    });
+    typeInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendTyped(); });
+
+    function sendTyped() {
+        const text = typeInput.value.trim();
+        if (!text) return;
+        if (!KEY || !TOKEN) { document.getElementById('noCredsWarning').classList.add('show'); return; }
+        sendCard(text);
+        typeInput.value = '';
+        typePreview.textContent = '';
+        typePreview.className = 'type-preview';
+    }
+
+    // ── SEND TO TRELLO ────────────────────────────────────────────────────────
+    async function sendCard(text) {
+        const list  = routeMessage(text);
+        const title = cleanTitle(text) || text;
+        const desc  = 'Sent from DGC Voice — ' + (userName || 'Unknown');
+
+        recordBtn.classList.add('sending');
+        tapLabel.textContent = 'SENDING…';
+        destBadge.textContent = '→ ' + list.name.toUpperCase();
+        destBadge.className = 'dest-badge busy';
+        setStatus('Sending to ' + list.name + '…', 'busy');
+
+        try {
+            const url = `https://api.trello.com/1/cards` +
+                        `?key=${encodeURIComponent(KEY)}` +
+                        `&token=${encodeURIComponent(TOKEN)}` +
+                        `&idList=${list.id}` +
+                        `&name=${encodeURIComponent(title)}` +
+                        `&desc=${encodeURIComponent(desc)}`;
+
+            const res = await fetch(url, { method: 'POST' });
+            recordBtn.classList.remove('sending');
+
+            if (res.ok) {
+                recordBtn.classList.add('success');
+                tapLabel.textContent = 'SENT ✓';
+                destBadge.textContent = '✓ ' + list.name.toUpperCase();
+                destBadge.className = 'dest-badge sent';
+                transcriptEl.classList.add('sent');
+                setStatus('Sent to ' + list.name + ' — ' + (userName || 'Unknown'), 'ok');
+                if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+
+                resetTimer = setTimeout(() => {
+                    recordBtn.classList.remove('success');
+                    tapLabel.textContent = 'TAP TO SPEAK';
+                    resetBadge();
+                    transcriptEl.textContent = 'Your message will appear here…';
+                    transcriptEl.classList.remove('sent');
+                    setStatus('Ready', '');
+                }, 4000);
+            } else {
+                setStatus('Trello error ' + res.status, 'error');
+                resetBadge(); tapLabel.textContent = 'TAP TO SPEAK';
+            }
+        } catch {
+            recordBtn.classList.remove('sending');
+            tapLabel.textContent = 'TAP TO SPEAK';
+            setStatus('Network error — check signal', 'error');
+            resetBadge();
+        }
+    }
+
+    // ── INBOX ─────────────────────────────────────────────────────────────────
+    let inboxOpen = false;
+    async function toggleInbox() {
+        const panel = document.getElementById('inboxPanel');
+        inboxOpen = !inboxOpen;
+        if (!inboxOpen) { panel.style.display = 'none'; return; }
+        panel.style.display = 'block';
+        const cl = document.getElementById('cardsList');
+        cl.innerHTML = '<div class="empty-msg">Loading…</div>';
+        if (!KEY || !TOKEN) { cl.innerHTML = '<div class="empty-msg">Not connected</div>'; return; }
+        try {
+            const url = `https://api.trello.com/1/lists/${LISTS.inbox.id}/cards?key=${KEY}&token=${TOKEN}&fields=name,desc`;
+            const cards = await (await fetch(url)).json();
+            cl.innerHTML = !cards.length
+                ? '<div class="empty-msg">Inbox is empty</div>'
+                : cards.map(c => `<div class="card-row">${esc(c.name)}</div>`).join('');
+        } catch {
+            cl.innerHTML = '<div class="empty-msg" style="color:#ff4444">Could not load — check connection</div>';
+        }
+    }
+
+    // ── UTILS ─────────────────────────────────────────────────────────────────
+    function setStatus(msg, type) { statusLine.textContent = msg; statusLine.className = 'status-line ' + (type||''); }
+    function resetBadge() { destBadge.textContent = "Tap your logo to speak"; destBadge.className = 'dest-badge idle'; }
+    function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // ── iOS INSTALL ───────────────────────────────────────────────────────────
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    if (isIOS && !isStandalone) document.getElementById('installHint').classList.add('show');
+
+    initRecognition();
+    </script>
+</body>
+</html>
