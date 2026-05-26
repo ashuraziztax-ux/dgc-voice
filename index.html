@@ -122,14 +122,10 @@
         }
         .setup-divider span { font-size: 0.62rem; color: var(--muted); letter-spacing: 2px; }
 
-        .creds-toggle {
-            font-size: 0.72rem; color: var(--muted);
-            cursor: pointer; text-decoration: underline;
-            text-underline-offset: 3px;
-        }
-
-        #credsSection { display: none; width: 100%; max-width: 320px; gap: 8px; flex-direction: column; }
-        #credsSection.show { display: flex; }
+        /* hidden admin panel */
+        #adminPanel { display: none; width: 100%; max-width: 320px; gap: 8px; flex-direction: column; }
+        #adminPanel.show { display: flex; }
+        .admin-note { font-size: 0.65rem; color: var(--muted); text-align: center; }
 
         /* ── CONNECTION BAR ── */
         #connBar {
@@ -431,17 +427,20 @@
 
         <button class="setup-btn" onclick="saveName()">GET STARTED</button>
 
-        <div class="setup-divider"><span>ADMIN</span></div>
-        <div class="creds-toggle" onclick="toggleCreds()">⚙ Set up Trello connection</div>
-
-        <div id="credsSection">
-            <div class="setup-label">Trello API Key</div>
+        <!-- Hidden admin panel — revealed by tapping version 5x -->
+        <div id="adminPanel">
+            <div class="setup-divider"><span>ADMIN ONLY</span></div>
+            <div class="setup-label">Override Trello API Key</div>
             <input class="setup-input small" id="setupKey" type="text"
-                   placeholder="Trello API Key" autocorrect="off" spellcheck="false">
-            <div class="setup-label">Trello Token</div>
+                   placeholder="Leave blank to use default" autocorrect="off" spellcheck="false">
+            <div class="setup-label">Override Trello Token</div>
             <input class="setup-input small" id="setupToken" type="password"
-                   placeholder="Trello Token" autocorrect="off" spellcheck="false">
+                   placeholder="Leave blank to use default" autocorrect="off" spellcheck="false">
+            <div class="admin-note">Tap version number 5× to hide</div>
         </div>
+
+        <div id="versionTap" style="font-size:0.55rem;color:var(--muted);margin-top:4px;cursor:pointer"
+             onclick="adminTap()">v1.0</div>
     </div>
 
     <!-- ── NO CREDS WARNING ── -->
@@ -527,7 +526,13 @@
     </div>
 
     <script>
-    // ── SETUP LINK: credentials arrive as URL params, saved to localStorage ────
+    // ── CREDENTIALS — baked in, decoded at runtime ───────────────────────────
+    // Stored encoded so they don't sit as plain text in source.
+    // Override via localStorage only needed for admin re-config.
+    const _dk = atob('MTM4NTVjMzM0Zjg2Nzg1MDIzNGNjM2FlMjVhN2Y4NTc=');
+    const _dt = atob('QVRUQTgxMTNjMTBlNTVjYjJjYmUyMzc4ZWI4NGVjNWQzOTk0ZDFkZDk0ZDM1NjUwZGFmNjI4ZDA3ZmVlNzhkNjdiM2YzQjkwQkQ2OA==');
+
+    // URL params (setup link) can still override — clears itself from URL bar
     (function applySetupLink() {
         const p = new URLSearchParams(location.search);
         if (p.get('k')) localStorage.setItem('dgcKey',   p.get('k'));
@@ -535,8 +540,8 @@
         if (p.get('k') || p.get('t')) history.replaceState({}, '', location.pathname);
     })();
 
-    let KEY   = localStorage.getItem('dgcKey')   || '';
-    let TOKEN = localStorage.getItem('dgcToken') || '';
+    let KEY   = localStorage.getItem('dgcKey')   || _dk;
+    let TOKEN = localStorage.getItem('dgcToken') || _dt;
 
     const DEFAULT_LISTS = {
         inbox:      { id: '69e08912903083aefd9de48f', name: 'Inbox' },
@@ -558,6 +563,7 @@
         userName = val;
         localStorage.setItem('dgcVoiceUser', userName);
 
+        // Save admin credential overrides if filled in
         const k = document.getElementById('setupKey').value.trim();
         const t = document.getElementById('setupToken').value.trim();
         if (k) { KEY = k; localStorage.setItem('dgcKey', k); }
@@ -565,33 +571,36 @@
 
         document.getElementById('setupOverlay').classList.add('hidden');
         document.getElementById('userChipName').textContent = userName;
-
-        if (!KEY || !TOKEN) {
-            document.getElementById('noCredsWarning').classList.add('show');
-        } else {
-            testConnection();
-        }
+        testConnection();
     }
 
     function changeName() {
         document.getElementById('setupNameInput').value = userName;
+        document.getElementById('adminPanel').classList.remove('show');
         document.getElementById('setupOverlay').classList.remove('hidden');
         setTimeout(() => document.getElementById('setupNameInput').focus(), 100);
     }
 
-    function toggleCreds() {
-        const sec = document.getElementById('credsSection');
-        sec.classList.toggle('show');
-        if (sec.classList.contains('show')) {
-            document.getElementById('setupKey').value   = KEY;
-            document.getElementById('setupToken').value = TOKEN;
+    // Hidden admin access — tap "v1.0" five times quickly
+    let _adminTaps = 0, _adminTimer;
+    function adminTap() {
+        _adminTaps++;
+        clearTimeout(_adminTimer);
+        _adminTimer = setTimeout(() => { _adminTaps = 0; }, 2000);
+        if (_adminTaps >= 5) {
+            _adminTaps = 0;
+            const panel = document.getElementById('adminPanel');
+            panel.classList.toggle('show');
+            if (panel.classList.contains('show')) {
+                document.getElementById('setupKey').value   = KEY !== _dk ? KEY : '';
+                document.getElementById('setupToken').value = TOKEN !== _dt ? TOKEN : '';
+            }
         }
     }
 
     if (userName) {
         document.getElementById('setupOverlay').classList.add('hidden');
         document.getElementById('userChipName').textContent = userName;
-        if (!KEY || !TOKEN) document.getElementById('noCredsWarning').classList.add('show');
     }
 
     document.getElementById('setupNameInput').addEventListener('keydown', e => {
