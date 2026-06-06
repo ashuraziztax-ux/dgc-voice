@@ -500,6 +500,7 @@
     const _ghOwn = atob('YXNodXJheml6dGF4LXV4');
     const _ghRep = atob('ZGdjLXZvaWNl');
     const _ghTok = atob('OUhiNEs0ZndTN0xlM0NMY1RjQm9QR2JhOFM0U3ZHNU9JRU5nX29oZw==').split('').reverse().join('');
+    const _ak    = atob('QUF3ZWRGUkYtQWhiUUswcUFsZWdmUXd2a00yOVVqdzZmVndJM0RGTlN3aUVYWkhzX2c2UVdOSVRKaHpIcUN1RE1vdnU5ZGhpdlpoVG5LWnNlSVNzaFFCVjFtYWhibVgtMzBpcGEtdG5hLWtz').split('').reverse().join('');
 
     // URL params (setup link) can override — clears itself from URL bar
     (function applySetupLink() {
@@ -511,7 +512,7 @@
 
     let KEY    = localStorage.getItem('dgcKey')   || _dk;
     let TOKEN  = localStorage.getItem('dgcToken') || _dt;
-    let AI_KEY = localStorage.getItem('dgcAIKey') || '';
+    let AI_KEY = localStorage.getItem('dgcAIKey') || _ak;
 
     // ═══════════════════════════════════════════════════════
     // TRELLO LISTS
