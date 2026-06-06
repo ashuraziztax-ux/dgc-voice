@@ -26,6 +26,8 @@
       "listId": "69e08915e048bd2bcf495cbc",
       "triggers": [
         "ash",
+        "mash",
+        "hash",
         "me",
         "myself",
         "remind me",

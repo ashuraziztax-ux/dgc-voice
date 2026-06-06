@@ -417,18 +417,7 @@
         <button class="countdown-cancel-btn" onclick="cancelVoiceSend()">CANCEL</button>
     </div>
 
-    <!-- ── CONNECTION BAR ── -->
-    <div id="connBar">
-        <div class="conn-dot" id="connDot"></div>
-        <span class="conn-label" id="connLabel">Checking connection…</span>
-        <button class="conn-test-btn" onclick="testConnection()">Test</button>
-    </div>
-
-    <!-- ── BRAIN BAR ── -->
-    <div id="brainBar">
-        <div class="conn-dot" id="brainDot"></div>
-        <span class="conn-label" id="brainLabel">Loading AI brain…</span>
-    </div>
+    <!-- status bars hidden — connection tested silently in background -->
 
     <!-- ── HEADER ── -->
     <header>
@@ -712,6 +701,14 @@ Rules:
 - Capitalise first word of title; fix site vocab; keep it concise
 - Respond ONLY with JSON, no explanation, no markdown
 
+CRITICAL — speech recognition mishears (treat these as the correct name):
+- "Mash", "Hash", "Cash", "Rash" → Ash
+- "Gary", "Hairy" → Harry
+- "Davit", "Devid", "Davy" → David
+- "Dryer", "Driver" → Driver Auto
+- "Awful" → Office
+When you see a word that sounds like a staff name, assume it IS that name.
+
 JSON format (exactly):
 {"listKey":"david","listId":"69e0891a1a68933066217928","listName":"David","title":"Fix pump at junction 4","confidence":0.95}`;
 
@@ -761,8 +758,26 @@ JSON format (exactly):
     // ═══════════════════════════════════════════════════════
     // KEYWORD ROUTING (fallback when no AI key)
     // ═══════════════════════════════════════════════════════
+    // Phonetic mishear map — speech recognition gets these wrong, route correctly anyway
+    const PHONETIC = {
+        // Ash mishears
+        'mash':'ash', 'hash':'ash', 'cash':'ash', 'rash':'ash',
+        // Harry mishears
+        'gary':'harry', 'hairy':'harry', 'harri':'harry',
+        // David/Dave mishears
+        'davit':'david', 'devid':'david', 'davy':'david',
+        // Driver mishears
+        'dryer':'driverAuto', 'tribe':'driverAuto',
+        // Office mishears
+        'awful':'office', 'offices':'office',
+    };
+
     function routeMessage(text) {
         const t = text.toLowerCase();
+        // Check phonetic mishears first
+        for (const [mishear, target] of Object.entries(PHONETIC)) {
+            if (new RegExp('\\b' + mishear + '\\b').test(t)) return LISTS[target] || LISTS.driverAuto;
+        }
         if (/\bdavid\b|\bdave\b/.test(t))                                           return LISTS.david;
         if (/\bharry\b/.test(t))                                                    return LISTS.harry;
         if (/\boffice\b|\badmin\b|\bpaperwork\b|\binvoice\b|\baccounts\b/.test(t)) return LISTS.office;
@@ -1019,7 +1034,7 @@ JSON format (exactly):
             if (AI_KEY) setBrainStatus('Keyword fallback used', 'warn');
         }
 
-        const desc = 'Sent from DGC Voice — ' + (userName || 'Unknown');
+        const desc = 'Sent from DGC Voice';
 
         recordBtn.classList.add('sending');
         tapLabel.textContent = 'SENDING…';
@@ -1045,7 +1060,7 @@ JSON format (exactly):
                 destBadge.className = 'dest-badge sent';
                 transcriptEl.textContent = title;
                 transcriptEl.classList.add('sent');
-                setStatus('Sent to ' + list.name + ' — ' + (userName || 'Unknown'), 'ok');
+                setStatus('Sent to ' + list.name + ' ✓', 'ok');
                 if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
 
                 // Learn from this card (async, non-blocking)
