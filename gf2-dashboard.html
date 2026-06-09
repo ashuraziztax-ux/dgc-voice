@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GF2 Glenfaba — Numbers Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* PASSWORD SCREEN */
+        #pw-screen {
+            position: fixed; inset: 0; background: #0c0c0e;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; flex-direction: column; gap: 16px;
+        }
+        #pw-screen h2 { color: #fff; font-family: -apple-system, sans-serif; font-size: 18px; font-weight: 500; }
+        #pw-screen p { color: #666; font-family: -apple-system, sans-serif; font-size: 13px; }
+        #pw-input {
+            background: #1a1a1d; border: 1px solid #333; border-radius: 8px;
+            color: #fff; font-size: 16px; padding: 12px 16px; width: 240px;
+            outline: none; text-align: center; letter-spacing: 0.1em;
+            font-family: -apple-system, sans-serif;
+        }
+        #pw-input:focus { border-color: #555; }
+        #pw-btn {
+            background: #2a2a2f; border: 1px solid #444; border-radius: 8px;
+            color: #fff; font-size: 14px; padding: 10px 28px; cursor: pointer;
+            font-family: -apple-system, sans-serif;
+        }
+        #pw-btn:hover { background: #333; }
+        #pw-error { color: #f87171; font-family: -apple-system, sans-serif; font-size: 13px; display: none; }
+        #pw-logo { color: #444; font-family: -apple-system, sans-serif; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+
+        /* MAIN CONTENT */
+        #main { display: none; }
+        body {
+            background: #111214; color: #e8e8e8;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 14px; line-height: 1.6;
+        }
+        .container { padding: 32px 24px; max-width: 1100px; margin: 0 auto; }
+        .page-header { border-bottom: 1px solid #222; padding-bottom: 20px; margin-bottom: 32px; }
+        .page-title { font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+        .page-meta { color: #666; font-size: 13px; }
+        .draft-banner { background: #1e1500; border: 1px solid #3d2a00; border-radius: 6px; padding: 10px 14px; color: #d4960a; font-size: 13px; margin-top: 12px; }
+        .board-banner { background: #0a1a2a; border: 1px solid #1a3a5a; border-radius: 6px; padding: 10px 14px; color: #6ab0e0; font-size: 13px; margin-top: 8px; }
+
+        .section { margin-bottom: 36px; }
+        .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #555; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #1e1e1e; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+
+        .stat-card { background: #1a1a1d; border: 1px solid #252528; border-radius: 8px; padding: 16px 18px; }
+        .stat-label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+        .stat-value { font-size: 26px; font-weight: 600; color: #fff; letter-spacing: -0.5px; }
+        .stat-value.green { color: #4ade80; }
+        .stat-value.amber { color: #fbbf24; }
+        .stat-value.red { color: #f87171; }
+        .stat-sub { font-size: 11px; color: #444; margin-top: 4px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 9px 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #555; background: #141416; border-bottom: 1px solid #1e1e1e; }
+        td { padding: 9px 12px; border-bottom: 1px solid #191919; color: #ccc; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        .table-wrap { background: #131315; border: 1px solid #1e1e1e; border-radius: 8px; overflow: hidden; }
+
+        .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.04em; white-space: nowrap; }
+        .badge-draft { background: #2a1f00; color: #d4960a; }
+        .badge-confirmed { background: #0d2218; color: #4ade80; }
+        .badge-risk { background: #220d0d; color: #f87171; }
+        .badge-board { background: #0a1a2a; color: #6ab0e0; }
+
+        .val-key { color: #fff; font-weight: 600; }
+        .val-green { color: #4ade80; font-weight: 600; }
+        .val-amber { color: #fbbf24; font-weight: 600; }
+        .val-red { color: #f87171; }
+        .val-muted { color: #444; }
+        .val-blue { color: #6ab0e0; }
+
+        .tables-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .risk-box { background: #180a0a; border: 1px solid #3a1515; border-radius: 8px; padding: 14px 16px; }
+        .risk-title { color: #f87171; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+
+        .board-box { background: #0a1520; border: 1px solid #1a3550; border-radius: 8px; padding: 14px 16px; margin-top: 12px; }
+        .board-title { color: #6ab0e0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+        .board-item { color: #aaa; font-size: 13px; padding: 4px 0; border-bottom: 1px solid #152030; }
+        .board-item:last-child { border-bottom: none; }
+        .board-item strong { color: #ddd; }
+
+        .timeline { display: flex; flex-direction: column; padding: 8px 16px; }
+        .timeline-item { display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid #191919; }
+        .timeline-item:last-child { border-bottom: none; }
+        .timeline-date { color: #fbbf24; font-size: 12px; font-weight: 600; min-width: 110px; padding-top: 2px; }
+        .timeline-text { color: #ccc; font-size: 13px; }
+        .timeline-text strong { color: #fff; }
+
+        .footnote { color: #444; font-size: 11px; margin-top: 10px; line-height: 1.5; }
+
+        .highlight-row { background: #1c1a10 !important; }
+        .highlight-row td { color: #fbbf24 !important; }
+
+        .correction-tag { display: inline-block; font-size: 10px; background: #0a1a2a; color: #6ab0e0; border-radius: 3px; padding: 1px 5px; margin-left: 6px; vertical-align: middle; }
+
+        @media (max-width: 700px) {
+            .grid-2, .grid-3, .grid-4, .tables-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- PASSWORD SCREEN -->
+<div id="pw-screen">
+    <div id="pw-logo">DGC Ltd — Internal</div>
+    <h2>GF2 Dashboard</h2>
+    <p>Enter password to continue</p>
+    <input type="password" id="pw-input" placeholder="Password" autocomplete="off" />
+    <div id="pw-error">Incorrect password</div>
+    <button id="pw-btn">Enter</button>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div id="main">
+<div class="container">
+
+<div class="page-header">
+    <div class="page-title">GF2 Glenfaba Ring Road — Master Numbers</div>
+    <div class="page-meta">DGC Ltd internal | Prepared 9 June 2026 | Source: Simon Taylor draft tender 08.06.26</div>
+    <div class="draft-banner">⚠️ GF2 figures are DRAFT — 9 June 2026. BA4 figures are CONFIRMED. Update after: Manx Rock confirms tarmac · Cuplas confirms pipe prices · Tuesday 9 Jun meeting resolves labour rates · Final tender submitted Friday 12 Jun 5pm.</div>
+    <div class="board-banner">🔵 Board validated 9 June 2026 — programme figures corrected from initial estimates. 2-gang programme revised from 18wks to 26wks. Additional prelim costs for multi-gang working identified. All other figures confirmed correct.</div>
+</div>
+
+<!-- 1. KEY NUMBERS -->
+<div class="section">
+    <div class="section-title">1 — Key Numbers</div>
+    <div class="grid-4">
+        <div class="stat-card">
+            <div class="stat-label">Total Tender Value</div>
+            <div class="stat-value">£1.30m</div>
+            <div class="stat-sub">£1,300,188.40 <span class="badge badge-draft">DRAFT</span></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Profit</div>
+            <div class="stat-value green">£169,589</div>
+            <div class="stat-sub">13.04% margin on turnover</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">OH&P Applied</div>
+            <div class="stat-value">15%</div>
+            <div class="stat-sub">on cost — Simon's model</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Tarmac Exposure</div>
+            <div class="stat-value red">£80,234</div>
+            <div class="stat-sub">if +35% spike, rates not updated</div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. TENDER STRUCTURE -->
+<div class="section">
+    <div class="section-title">2 — Tender Structure</div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Bill</th><th>Description</th><th style="text-align:right">Value</th><th style="text-align:right">%</th></tr></thead>
+            <tbody>
+                <tr><td>Bill 1</td><td>External Works <span style="color:#444;font-size:11px">— inc. tarmac £263,625 (20.3% of total)</span></td><td style="text-align:right" class="val-key">£491,463</td><td style="text-align:right">37.8%</td></tr>
+                <tr><td>Bill 2</td><td>Drainage <span style="color:#444;font-size:11px">— critical path, governs programme</span></td><td style="text-align:right" class="val-key">£704,846</td><td style="text-align:right">54.2%</td></tr>
+                <tr><td>Bill 3</td><td>Services</td><td style="text-align:right">£9,864</td><td style="text-align:right">0.8%</td></tr>
+                <tr><td>Bill 4</td><td>Street Lighting</td><td style="text-align:right">£4,011</td><td style="text-align:right">0.3%</td></tr>
+                <tr><td>Bill 5</td><td>Preliminaries <span style="color:#444;font-size:11px">— time-based, priced for 1-gang. Increases with additional gangs.</span></td><td style="text-align:right">£90,005</td><td style="text-align:right">6.9%</td></tr>
+                <tr style="background:#1a1a1d"><td colspan="2"><strong>GRAND TOTAL</strong></td><td style="text-align:right" class="val-green"><strong>£1,300,188</strong></td><td style="text-align:right">100%</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 3. PROFIT -->
+<div class="section">
+    <div class="section-title">3 — Profit Mechanics</div>
+    <div class="grid-2" style="margin-bottom:14px">
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Profit Build (1-gang baseline)</th><th style="text-align:right">Value</th></tr></thead>
+                <tbody>
+                    <tr><td>Total turnover</td><td style="text-align:right">£1,300,188</td></tr>
+                    <tr><td>Total cost (÷ 1.15)</td><td style="text-align:right">£1,130,599</td></tr>
+                    <tr><td><strong>Total profit</strong></td><td style="text-align:right" class="val-green"><strong>£169,589</strong></td></tr>
+                    <tr><td>Margin on turnover</td><td style="text-align:right">13.04%</td></tr>
+                    <tr><td>OH&P on cost</td><td style="text-align:right">15.0%</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Tarmac Isolated</th><th style="text-align:right">Value</th></tr></thead>
+                <tbody>
+                    <tr><td>AC32 + AC20 in tender (items 10+11)</td><td style="text-align:right">£263,625</td></tr>
+                    <tr><td>Tarmac cost (÷ 1.15)</td><td style="text-align:right">£229,239</td></tr>
+                    <tr><td>Profit from tarmac at current rates</td><td style="text-align:right" class="val-green">£34,386</td></tr>
+                    <tr><td>If Manx Rock +35% — new cost</td><td style="text-align:right" class="val-amber">£309,473</td></tr>
+                    <tr><td>Exposure if tender not updated</td><td style="text-align:right" class="val-red">£80,234</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Scenario</th><th style="text-align:right">Tender</th><th style="text-align:right">Total Profit</th><th style="text-align:right">Monthly (32wk)</th><th>Risk</th></tr></thead>
+            <tbody>
+                <tr><td>Simon's draft — tarmac at old price</td><td style="text-align:right">£1,300,188</td><td style="text-align:right" class="val-amber">£169,589</td><td style="text-align:right">£21,199</td><td><span class="badge badge-risk">⚠️ £80k exposed</span></td></tr>
+                <tr><td>Confirmed Manx Rock — pass through at 15%</td><td style="text-align:right">~£1,300k+</td><td style="text-align:right" class="val-green">~£170k locked</td><td style="text-align:right">~£21k</td><td><span class="badge badge-confirmed">Zero risk</span></td></tr>
+                <tr><td>Strip tarmac out of DGC scope entirely</td><td style="text-align:right">£1,036,563</td><td style="text-align:right">£135,203</td><td style="text-align:right">£16,900</td><td><span class="badge badge-confirmed">Zero risk</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="footnote">Keeping tarmac in (at confirmed price) vs stripping it out = £34,386 extra profit. Worth keeping in once Manx Rock confirms the rate. Monthly figures based on 32-week, 1-gang programme, 8 AFPs.</div>
+</div>
+
+<!-- 4. GANG SCENARIOS — BOARD CORRECTED -->
+<div class="section">
+    <div class="section-title">4 — Gang Count Scenarios <span class="correction-tag">Board corrected 9 Jun</span></div>
+
+    <div class="board-box" style="margin-bottom:14px">
+        <div class="board-title">🔵 Why previous figures were wrong — Board finding</div>
+        <div class="board-item"><strong>Original 2-gang = 18 weeks:</strong> Wrong. Derived by simply halving Simon's 32-week estimate. Does not account for sequential constraints within each phase or the physical limits of a ring road site.</div>
+        <div class="board-item"><strong>The ring road has two phases</strong> (Phase 1: S36→S25 / Phase 2: S41→S55) that genuinely can run in parallel. That's the efficiency gain from 2 gangs — not halving the total, but running the phases concurrently.</div>
+        <div class="board-item"><strong>300mm and 450mm pipe (404m total)</strong> is significantly slower per metre than smaller pipe — wider trench, deeper, more backfill, needs 21T excavator. Can't simply double this with more gangs. One machine, one trench.</div>
+        <div class="board-item"><strong>Prelims don't scale.</strong> Simon priced Site Manager at 50% time, 1 set of plant. Running 2 gangs = SM at 100% + 2nd excavator + 2nd dumper + 2nd drag box. ~£66k additional cost NOT in the current tender. Must add to prelims before submission if 2-gang working is planned.</div>
+        <div class="board-item"><strong>Inspection bottleneck.</strong> Dandara must sign off manholes, drainage, CCTV before progression. Two gangs = two inspection queues. On IoM, Dandara's site team pace limits concurrent inspection throughput.</div>
+        <div class="board-item"><strong>Floor constraint.</strong> CCTV survey, air/water testing, Dandara sign-off — these take time regardless of gang count. Programme cannot realistically go below ~15-16 weeks even with unlimited gangs.</div>
+    </div>
+
+    <div class="tables-row">
+        <div>
+            <div style="font-size:11px;color:#555;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em">Normal Pace — Board Corrected</div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Gangs</th><th>Programme</th><th style="text-align:right">/Month revenue</th><th style="text-align:right">/Month profit</th><th style="text-align:right">Extra prelim cost</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>32 wks</td><td style="text-align:right">£162,524</td><td style="text-align:right" class="val-green">£21,199</td><td style="text-align:right val-muted">—</td></tr>
+                        <tr class="highlight-row"><td>2</td><td>26 wks</td><td style="text-align:right">£200,029</td><td style="text-align:right">£26,074</td><td style="text-align:right" class="val-red">+£66k cost</td></tr>
+                        <tr><td>3</td><td>20 wks</td><td style="text-align:right">£260,038</td><td style="text-align:right">£33,918</td><td style="text-align:right" class="val-red">+£110k cost</td></tr>
+                        <tr><td>4</td><td>17 wks</td><td style="text-align:right">£305,927</td><td style="text-align:right">£39,903</td><td style="text-align:right" class="val-red">+£145k cost</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div>
+            <div style="font-size:11px;color:#555;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em">At 10% Slower — Board Corrected</div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Gangs</th><th>Programme</th><th style="text-align:right">/Month revenue</th><th style="text-align:right">/Month profit</th><th style="text-align:right">Total profit</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>35 wks</td><td style="text-align:right">£148,593</td><td style="text-align:right">£19,382</td><td style="text-align:right" class="val-muted">£161,000</td></tr>
+                        <tr class="highlight-row"><td>2</td><td>29 wks</td><td style="text-align:right">£179,334</td><td style="text-align:right">£23,393</td><td style="text-align:right">£162,000</td></tr>
+                        <tr><td>3</td><td>22 wks</td><td style="text-align:right">£236,398</td><td style="text-align:right">£30,835</td><td style="text-align:right">£164,000</td></tr>
+                        <tr><td>4</td><td>19 wks</td><td style="text-align:right">£273,724</td><td style="text-align:right">£35,704</td><td style="text-align:right">£164,000</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="footnote">⚠️ Monthly profit for 2+ gangs does NOT account for the additional prelim cost (~£66k for 2 gangs). If that cost is NOT added to the tender, actual profit on 2-gang working drops significantly. If it IS added to the tender: tender rises to ~£1,366k and profit stays comparable. Extra prelim costs must be discussed at Tuesday meeting before submission. Highlighted row = 2 gangs (BA4-style team), the most likely deployment.</div>
+
+    <div style="margin-top:14px">
+        <div class="board-box">
+            <div class="board-title">🔵 What "Working Capital" actually means</div>
+            <div class="board-item"><strong>1 gang:</strong> ~£35k/week costs × 4-6 week payment lag = <strong>£140–210k needed in bank</strong></div>
+            <div class="board-item"><strong>2 gangs:</strong> ~£70k/week × 4-6 weeks = <strong>£280–420k needed</strong></div>
+            <div class="board-item"><strong>AFP 8 (tarmac):</strong> Regardless of gang count, you pay Manx Rock ~£177k for Phase 2 tarmac on delivery. This hits while you're waiting 6-8 weeks for AFP 8 payment. <strong>Peak cash requirement = programme's weekly costs + £177k tarmac in the same window.</strong></div>
+        </div>
+    </div>
+</div>
+
+<!-- 5. AFP CASHFLOW -->
+<div class="section">
+    <div class="section-title">5 — AFP Cash Flow — 1 Gang, 8 Periods (32 Weeks)</div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>AFP</th><th>Weeks</th><th style="text-align:right">Revenue billed</th><th style="text-align:right">Materials out</th><th style="text-align:right">Labour & plant</th><th style="text-align:right">Profit</th><th>What's happening</th></tr></thead>
+            <tbody>
+                <tr><td>AFP 1</td><td>1–4</td><td style="text-align:right">£162,524</td><td style="text-align:right">£58,000</td><td style="text-align:right">£83,000</td><td style="text-align:right" class="val-green">£21,500</td><td style="color:#444;font-size:12px">6F2, Terram, formation</td></tr>
+                <tr><td>AFP 2</td><td>5–8</td><td style="text-align:right">£162,524</td><td style="text-align:right">£65,000</td><td style="text-align:right">£76,000</td><td style="text-align:right" class="val-green">£21,500</td><td style="color:#444;font-size:12px">Phase 1 drainage starts</td></tr>
+                <tr><td>AFP 3</td><td>9–12</td><td style="text-align:right">£162,524</td><td style="text-align:right">£72,000</td><td style="text-align:right">£69,000</td><td style="text-align:right" class="val-green">£21,500</td><td style="color:#444;font-size:12px">150/225mm pipe, manholes</td></tr>
+                <tr><td>AFP 4</td><td>13–16</td><td style="text-align:right">£162,524</td><td style="text-align:right">£78,000</td><td style="text-align:right">£63,000</td><td style="text-align:right" class="val-green">£21,500</td><td style="color:#444;font-size:12px">300/450mm large pipe starts — slow</td></tr>
+                <tr><td>AFP 5</td><td>17–20</td><td style="text-align:right">£162,524</td><td style="text-align:right">£82,000</td><td style="text-align:right">£59,000</td><td style="text-align:right" class="val-green">£21,500</td><td style="color:#444;font-size:12px">Phase 2 drainage</td></tr>
+                <tr><td>AFP 6</td><td>21–24</td><td style="text-align:right">£162,524</td><td style="text-align:right">£68,000</td><td style="text-align:right">£73,000</td><td style="text-align:right" class="val-green">£21,500</td><td style="color:#444;font-size:12px">CCTV, kerb race, services</td></tr>
+                <tr style="background:#1e1b10"><td>AFP 7</td><td>25–28</td><td style="text-align:right">£162,524</td><td style="text-align:right" class="val-amber">£104,000</td><td style="text-align:right">£37,000</td><td style="text-align:right" class="val-green">£21,500</td><td style="color:#d4960a;font-size:12px">⚠️ Phase 1 tarmac hits (~£52k)</td></tr>
+                <tr style="background:#180a0a"><td>AFP 8</td><td>29–32</td><td style="text-align:right">£162,524</td><td style="text-align:right" class="val-red">£229,000</td><td style="text-align:right" class="val-muted">—</td><td style="text-align:right" class="val-green">£21,500</td><td style="color:#f87171;font-size:12px">🔴 Phase 2 tarmac — cash monster</td></tr>
+                <tr style="background:#1a1a1d"><td colspan="2"><strong>TOTAL</strong></td><td style="text-align:right" class="val-key"><strong>£1,300,188</strong></td><td style="text-align:right">~£756,000</td><td style="text-align:right">~£460,000</td><td style="text-align:right" class="val-green"><strong>£169,589</strong></td><td></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div style="margin-top:12px">
+        <div class="risk-box">
+            <div class="risk-title">🔴 AFP 8 — Cash Warning</div>
+            <div style="color:#ccc;font-size:13px">Phase 2 tarmac (2,275m² AC32) lands in AFP 8. You pay Manx Rock ~£177,000 on delivery. Dandara don't pay you for AFP 8 for another 6–8 weeks. You need £229,000 available in that 4-week window. <strong style="color:#f87171">This is the cash crisis point of the whole job.</strong><br><br>Retention: 3% per AFP = £4,876/AFP. Total held: £39,006. Half (£19,503) released at PC. Half at DoI adoption — potentially 12–18 months after you finish.</div>
+        </div>
+    </div>
+</div>
+
+<!-- 6. BA4 vs GF2 -->
+<div class="section">
+    <div class="section-title">6 — BA4 vs GF2 — Quantity Comparison</div>
+    <div class="table-wrap" style="margin-bottom:16px">
+        <table>
+            <thead><tr><th>Scope element</th><th style="text-align:right">BA4 <span class="badge badge-confirmed">CONFIRMED</span></th><th style="text-align:right">GF2 <span class="badge badge-draft">DRAFT</span></th><th style="text-align:right">GF2 is...</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Contract value</strong></td><td style="text-align:right">£469,379</td><td style="text-align:right">£1,300,188</td><td style="text-align:right" class="val-key">2.8×</td></tr>
+                <tr><td><strong>Total pipe</strong></td><td style="text-align:right"><strong>517m</strong></td><td style="text-align:right"><strong>1,767m</strong></td><td style="text-align:right" class="val-amber"><strong>3.4× — critical path</strong></td></tr>
+                <tr><td style="padding-left:20px;color:#555;font-size:12px">— 110mm</td><td style="text-align:right;color:#555;font-size:12px">96m</td><td style="text-align:right;color:#555;font-size:12px">438m</td><td style="text-align:right;color:#555;font-size:12px">4.6×</td></tr>
+                <tr><td style="padding-left:20px;color:#555;font-size:12px">— 150mm</td><td style="text-align:right;color:#555;font-size:12px">226m</td><td style="text-align:right;color:#555;font-size:12px">747m</td><td style="text-align:right;color:#555;font-size:12px">3.3×</td></tr>
+                <tr><td style="padding-left:20px;color:#555;font-size:12px">— 225mm</td><td style="text-align:right;color:#555;font-size:12px">195m</td><td style="text-align:right;color:#555;font-size:12px">178m</td><td style="text-align:right;color:#555;font-size:12px">same</td></tr>
+                <tr><td style="padding-left:20px;color:#d4960a;font-size:12px">— 300mm (new — slower to lay)</td><td style="text-align:right;color:#444;font-size:12px">0m</td><td style="text-align:right;color:#d4960a;font-size:12px">212m</td><td style="text-align:right;color:#d4960a;font-size:12px">new</td></tr>
+                <tr><td style="padding-left:20px;color:#d4960a;font-size:12px">— 450mm (new — significantly slower)</td><td style="text-align:right;color:#444;font-size:12px">0m</td><td style="text-align:right;color:#d4960a;font-size:12px">192m</td><td style="text-align:right;color:#d4960a;font-size:12px">new</td></tr>
+                <tr><td>Manholes</td><td style="text-align:right">12 nr</td><td style="text-align:right">38+ nr</td><td style="text-align:right" class="val-key">3.2×</td></tr>
+                <tr><td>Earthworks (reduce level)</td><td style="text-align:right">428m³</td><td style="text-align:right">1,710m³</td><td style="text-align:right" class="val-key">4.0×</td></tr>
+                <tr><td>Formation area (Terram)</td><td style="text-align:right">2,029m²</td><td style="text-align:right">4,346m²</td><td style="text-align:right">2.1×</td></tr>
+                <tr><td>Tarmac total</td><td style="text-align:right">1,460m²</td><td style="text-align:right">3,171m²</td><td style="text-align:right">2.2×</td></tr>
+                <tr><td>Kerb race / kerbing</td><td style="text-align:right">841m</td><td style="text-align:right">1,336m</td><td style="text-align:right">1.6×</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="grid-3">
+        <div class="stat-card">
+            <div class="stat-label">BA4 Actual</div>
+            <div class="stat-value">13 wks</div>
+            <div class="stat-sub">2 gangs + 1 gang 50% = 2.5 avg</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">GF2 — Same Team (corrected)</div>
+            <div class="stat-value amber">~32 wks</div>
+            <div class="stat-sub">2.5 gangs · £20k/month · £170k total</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">GF2 — 3 Gangs (corrected)</div>
+            <div class="stat-value">~20 wks</div>
+            <div class="stat-sub">£34k/month but +£110k prelim cost</div>
+        </div>
+    </div>
+    <div class="board-box" style="margin-top:14px">
+        <div class="board-title">🔵 Why "same team" doesn't give a proportional time saving</div>
+        <div class="board-item"><strong>BA4 gang-weeks:</strong> 2.5 gangs × 13 weeks = 32.5 gang-weeks of work for a £469k job</div>
+        <div class="board-item"><strong>GF2 difficulty-adjusted multiplier:</strong> scope is 2.8× BA4 by value, but adjusted to ~3.0× for large pipe difficulty (300/450mm), ring road logistics, and inspection flow constraints</div>
+        <div class="board-item"><strong>GF2 gang-weeks needed:</strong> 32.5 × 3.0 = ~98 gang-weeks</div>
+        <div class="board-item"><strong>With 2.5 gangs (same team):</strong> 98 ÷ 2.5 = ~39 weeks. Ring road's parallel phases compress this to ~32 weeks — matching Simon's estimate almost exactly.</div>
+        <div class="board-item"><strong>Conclusion:</strong> Simon's 32-week 1-gang estimate and the BA4-benchmarked 2.5-gang team both land at ~32 weeks. The two methods agree. This gives high confidence in the programme.</div>
+    </div>
+</div>
+
+<!-- 7. RATES -->
+<div class="section">
+    <div class="section-title">7 — Rates</div>
+    <div class="tables-row">
+        <div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Labour</th><th style="text-align:right">Rate/hr</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td>Excavator operator</td><td style="text-align:right">£30.63</td><td><span class="badge badge-draft">Debate Tuesday</span></td></tr>
+                        <tr><td>Skilled groundworker</td><td style="text-align:right">£30.63</td><td><span class="badge badge-draft">Debate Tuesday</span></td></tr>
+                        <tr><td>Groundworks labourer</td><td style="text-align:right">£22.00</td><td><span class="badge badge-risk">⚠️ Below true cost ~£30</span></td></tr>
+                        <tr><td>Site Manager</td><td style="text-align:right">£40.00</td><td><span class="badge badge-confirmed">OK</span></td></tr>
+                        <tr><td>QS (tender + AFPs)</td><td style="text-align:right">£55.00</td><td><span class="badge badge-confirmed">OK</span></td></tr>
+                        <tr><td>Site Engineer</td><td style="text-align:right">£55.00</td><td><span class="badge badge-confirmed">OK</span></td></tr>
+                        <tr><td>Road sweeper / dust</td><td style="text-align:right">£65.00</td><td><span class="badge badge-confirmed">OK</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top:12px">
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Plant</th><th style="text-align:right">Rate</th></tr></thead>
+                        <tbody>
+                            <tr><td>9T excavator (no fuel/op)</td><td style="text-align:right">£12.50/hr</td></tr>
+                            <tr><td>21T excavator (no fuel)</td><td style="text-align:right">£17.78/hr</td></tr>
+                            <tr><td>5T excavator (with op + fuel)</td><td style="text-align:right">£44.98/hr</td></tr>
+                            <tr><td>9T dumper (no op/fuel)</td><td style="text-align:right">£7.78/hr</td></tr>
+                            <tr><td>Diesel trench roller</td><td style="text-align:right">£5.66/hr</td></tr>
+                            <tr><td>Twin drum ride-on roller</td><td style="text-align:right">£5.56/hr</td></tr>
+                            <tr><td>Trench drag box 2400×900</td><td style="text-align:right">£10.00/hr</td></tr>
+                            <tr><td>White diesel</td><td style="text-align:right">£1.55/litre</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Material</th><th style="text-align:right">Rate</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td>Type 1 granular (AV Craine)</td><td style="text-align:right">£28.98/t</td><td><span class="badge badge-risk">20% fuel surcharge</span></td></tr>
+                        <tr><td>6F2 capping (AV Craine)</td><td style="text-align:right">£19.98/t</td><td><span class="badge badge-confirmed">OK</span></td></tr>
+                        <tr><td>Pea gravel 10/14mm</td><td style="text-align:right">£34.09/t</td><td><span class="badge badge-confirmed">OK</span></td></tr>
+                        <tr><td>C15 concrete (Island Aggs)</td><td style="text-align:right">£180.00/m³</td><td><span class="badge badge-draft">Confirm Mon</span></td></tr>
+                        <tr><td>C25 concrete</td><td style="text-align:right">£190.00/m³</td><td><span class="badge badge-draft">Confirm Mon</span></td></tr>
+                        <tr><td>C35 concrete</td><td style="text-align:right">£195.00/m³</td><td><span class="badge badge-draft">Confirm Mon</span></td></tr>
+                        <tr><td>110mm solid wall pipe</td><td style="text-align:right">£3.56/m</td><td><span class="badge badge-confirmed">OK</span></td></tr>
+                        <tr><td>150mm Polysewer</td><td style="text-align:right">£8.50/m</td><td><span class="badge badge-draft">Confirm Cuplas</span></td></tr>
+                        <tr><td>225mm Polysewer</td><td style="text-align:right">£21.81/m</td><td><span class="badge badge-draft">Confirm Cuplas</span></td></tr>
+                        <tr><td>300mm Polysewer</td><td style="text-align:right">£47.33/m</td><td><span class="badge badge-draft">Confirm Cuplas</span></td></tr>
+                        <tr><td>450mm Polysewer</td><td style="text-align:right">£94.18/m</td><td><span class="badge badge-draft">Confirm Cuplas</span></td></tr>
+                        <tr><td>AC32 tarmac (all-in rate)</td><td style="text-align:right">£89.70/m²</td><td><span class="badge badge-risk">⚠️ Confirm Manx Rock</span></td></tr>
+                        <tr><td>AC20 binder (all-in rate)</td><td style="text-align:right">£66.47/m²</td><td><span class="badge badge-risk">⚠️ Confirm Manx Rock</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 8. TIMELINE -->
+<div class="section">
+    <div class="section-title">8 — Actions to Submission</div>
+    <div class="table-wrap">
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-date">Mon 9 Jun</div>
+                <div class="timeline-text"><strong>Harry</strong> — Manx Rock tarmac rate confirmed. <strong>Simon</strong> — Cuplas (300/450mm pipe) + Island Aggs (concrete rates). <strong>Ash</strong> — programme aspiration from Kal/Olly.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">Tue 9 Jun 1pm</div>
+                <div class="timeline-text"><strong>Simon's office, QVH Victoria St, Douglas.</strong> Finalise labour rates. Confirm tarmac rate. Add multi-gang prelims if 2-gang working planned. Agree price escalation mechanism with Dandara.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">Wed–Thu 11 Jun</div>
+                <div class="timeline-text">Sophie (PQD) prices BoQ. DGC programme drafted. Plant + labour schedule. RAMS / H&S pre-qual. PQQ completed and returned to Dandara.</div>
+            </div>
+            <div class="timeline-item" style="border-color:#3a1515">
+                <div class="timeline-date" style="color:#f87171">Fri 12 Jun 5pm</div>
+                <div class="timeline-text"><strong style="color:#f87171">DEADLINE — kchudasama@dandara.com.</strong> Priced BoQ + programme + plant schedule + RAMS + PQQ. Do not miss.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">Before 30 Jun</div>
+                <div class="timeline-text">Dandara want start ASAP. Mobilise immediately if awarded. Overlaps with BA4 wrap-up — manage plant and key operatives carefully.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="border-top:1px solid #1a1a1a;padding-top:16px;color:#333;font-size:11px;margin-top:8px">
+    GF2 Glenfaba Ring Road | DGC Ltd internal only | Dashboard prepared 9 June 2026 | Board validated 9 June 2026 | All GF2 figures DRAFT from Simon Taylor tender 08.06.26 | Supersedes when final tender submitted Friday 12 June 5pm.
+</div>
+
+</div><!-- container -->
+</div><!-- main -->
+
+<script>
+    const CORRECT_PASSWORD = "Test";
+
+    function checkAuth() {
+        return sessionStorage.getItem("gf2_auth") === "ok";
+    }
+
+    function showDashboard() {
+        document.getElementById("pw-screen").style.display = "none";
+        document.getElementById("main").style.display = "block";
+    }
+
+    if (checkAuth()) {
+        showDashboard();
+    }
+
+    document.getElementById("pw-btn").addEventListener("click", function() {
+        const val = document.getElementById("pw-input").value;
+        if (val === CORRECT_PASSWORD) {
+            sessionStorage.setItem("gf2_auth", "ok");
+            showDashboard();
+        } else {
+            document.getElementById("pw-error").style.display = "block";
+            document.getElementById("pw-input").value = "";
+            document.getElementById("pw-input").focus();
+        }
+    });
+
+    document.getElementById("pw-input").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") document.getElementById("pw-btn").click();
+    });
+</script>
+
+</body>
+</html>
