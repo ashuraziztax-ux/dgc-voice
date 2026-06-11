@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DGC — Private</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a18;font-size:14px;line-height:1.5}
+#gate{position:fixed;inset:0;background:#1a1a18;display:flex;align-items:center;justify-content:center;z-index:100}
+.gate-card{background:#fff;border-radius:14px;padding:44px 40px;max-width:360px;width:90%;text-align:center}
+.gate-logo{font-size:13px;font-weight:500;letter-spacing:0.12em;color:#888780;margin-bottom:28px}
+.gate-card h1{font-size:20px;font-weight:500;margin-bottom:6px}
+.gate-card p{color:#888780;font-size:13px;margin-bottom:28px;line-height:1.6}
+.gate-card input{width:100%;padding:14px 16px;border:1px solid #e0e0d8;border-radius:9px;font-size:22px;letter-spacing:6px;text-align:center;margin-bottom:12px;outline:none;transition:border-color 0.15s}
+.gate-card input:focus{border-color:#7F77DD}
+.gate-card button{width:100%;padding:13px;background:#1a1a18;color:#fff;border:none;border-radius:9px;font-size:14px;cursor:pointer;font-weight:500;transition:background 0.15s}
+.gate-card button:hover{background:#333}
+.gate-err{color:#E24B4A;font-size:12px;margin-top:10px;display:none}
+#main{display:none;max-width:920px;margin:0 auto;padding:36px 20px 80px}
+.header{margin-bottom:28px}
+.header-eyebrow{font-size:11px;color:#888780;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+.header-title{font-size:24px;font-weight:500;color:#1a1a18}
+.header-sub{font-size:14px;color:#888780;margin-top:5px}
+.toggle{display:inline-flex;background:#e8e8e2;border-radius:9px;padding:3px;margin-bottom:28px}
+.toggle button{padding:9px 28px;border:none;background:transparent;border-radius:7px;font-size:14px;cursor:pointer;color:#888780;transition:all 0.15s;font-weight:400}
+.toggle button.active{background:#1a1a18;color:#fff;font-weight:500}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.metric{background:#1a1a18;color:#fff;border-radius:11px;padding:18px 20px}
+.metric-label{font-size:11px;color:#706f6b;margin-bottom:7px;line-height:1.4}
+.metric-val{font-size:22px;font-weight:500;line-height:1.2}
+.metric-sub{font-size:11px;color:#504f4c;margin-top:5px}
+.card{background:#fff;border:0.5px solid #e0e0d8;border-radius:12px;padding:22px;margin-bottom:22px}
+.card-title{font-size:14px;font-weight:500;margin-bottom:16px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:12px;font-size:12px;color:#888780}
+.legend span{display:flex;align-items:center;gap:5px}
+.ls{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.ll{width:16px;height:0;flex-shrink:0}
+.chart-wrap{position:relative;width:100%;height:250px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:right;padding:7px 10px;font-weight:500;color:#888780;border-bottom:1px solid #e0e0d8;font-size:11px;white-space:nowrap}
+th:first-child,th:nth-child(2){text-align:left}
+td{text-align:right;padding:8px 10px;border-bottom:0.5px solid #f0f0ea;color:#3a3a38;white-space:nowrap}
+td:first-child,td:nth-child(2){text-align:left}
+tr.grace td{color:#bbb}
+tr.payback{background:#f0fdf4}
+tr.payback td{color:#0f6e56;font-weight:500}
+tr.sep td{background:#f7f7f2;color:#888780;font-size:11px;text-align:center;font-style:italic;padding:6px;border:none}
+tr.plateau td{color:#888780}
+.table-note{font-size:11px;color:#aaa;margin-top:10px;line-height:1.6}
+.sha-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
+.sha-item{padding:16px;background:#f7f7f2;border-radius:9px}
+.sha-item-title{font-size:13px;font-weight:500;margin-bottom:5px}
+.sha-item-body{font-size:12px;color:#6b6b67;line-height:1.55}
+.sha-item.green{background:#f0fdf4}
+.sha-item.green .sha-item-title{color:#0f6e56}
+.sha-item.green .sha-item-body{color:#2d7a52}
+.footer{font-size:11px;color:#aaa;text-align:center;margin-top:44px;line-height:1.8}
+@media(max-width:600px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .sha-grid{grid-template-columns:1fr}
+  .toggle button{padding:9px 18px;font-size:13px}
+  .header-title{font-size:20px}
+  th,td{padding:6px 7px;font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">DGC LTD</div>
+    <h1>Private document</h1>
+    <p>This proposal is confidential.<br>Enter the access code to continue.</p>
+    <input type="password" id="pwd" placeholder="&bull;&bull;&bull;&bull;" maxlength="8" autofocus onkeydown="if(event.key==='Enter')checkPwd()">
+    <button onclick="checkPwd()">View proposal</button>
+    <div class="gate-err" id="err">Incorrect code — try again.</div>
+  </div>
+</div>
+
+<div id="main">
+  <div class="header">
+    <div class="header-eyebrow">Private &amp; confidential &middot; June 2026</div>
+    <div class="header-title">DGC Investment Proposal</div>
+    <div class="header-sub">Prepared by Ash Aziz &middot; For review by Harry Harrison</div>
+  </div>
+
+  <div class="toggle">
+    <button class="active" id="btn100" onclick="setDeal(100)">£100k &middot; 7%</button>
+    <button id="btn150" onclick="setDeal(150)">£150k &middot; 10%</button>
+  </div>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="card">
+    <div class="card-title">Return projection &mdash; 18 years (optimistic case: 10% EBITDA margin)</div>
+    <div class="legend">
+      <span><span class="ls" style="background:#85B7EB"></span>Annual dividend &mdash; growth phase</span>
+      <span><span class="ls" style="background:#9FE1CB"></span>Annual dividend &mdash; plateau</span>
+      <span><span class="ll" style="border-top:2.5px solid #22a06b"></span>Cumulative dividends</span>
+      <span><span class="ll" style="border-top:2px dashed #EF9F27"></span>Stake / buyback value</span>
+      <span><span class="ll" style="border-top:2.5px solid #7F77DD"></span>Total exit value</span>
+      <span><span class="ll" style="border-top:2px dashed #ccc"></span>Investment</span>
+    </div>
+    <div class="chart-wrap"><canvas id="mainChart" role="img" aria-label="18-year financial projection showing annual dividends, cumulative total, stake value and total exit for the selected deal"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Year by year breakdown</div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Year</th><th>FY</th><th>Turnover</th><th>Co. value</th><th>EBITDA</th><th>Dist.</th><th>Daniel &pound;/yr</th><th>Daniel total</th><th>Stake / buyback</th><th>Exit total</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="table-note">
+      Green row = investment payback achieved via dividends alone. &middot;
+      Dist = 50% of EBITDA distributed annually (directors&rsquo; discretion). &middot;
+      Stake = 4&times; EBITDA &times; equity %. &middot;
+      Exit = cumulative dividends + stake value. &middot;
+      0% Isle of Man corporate tax applies throughout.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Shareholders agreement &mdash; five protections</div>
+    <p style="font-size:13px;color:#6b6b67;line-height:1.6">A shareholders agreement is drafted and signed before any money moves. All five terms are standard and non-onerous for DGC. Estimated cost: &pound;2,000 from an IoM solicitor, 2&ndash;3 weeks to complete.</p>
+    <div class="sha-grid">
+      <div class="sha-item">
+        <div class="sha-item-title">1 &middot; Tag-along rights</div>
+        <div class="sha-item-body">If DGC is sold, Daniel sells at the same price per share. He can never be excluded from a sale &mdash; his equity rides alongside Ash and Harry&rsquo;s in any transaction.</div>
+      </div>
+      <div class="sha-item">
+        <div class="sha-item-title">2 &middot; Pre-emption on new shares</div>
+        <div class="sha-item-body">If DGC raises capital in future by issuing new shares, Daniel has first right to participate and maintain his equity percentage. No silent dilution without notice.</div>
+      </div>
+      <div class="sha-item">
+        <div class="sha-item-title">3 &middot; Dividend policy documented</div>
+        <div class="sha-item-body">Annual review. Written target: 40&ndash;50% of profit distributed when cashflow allows. Not a legally binding obligation &mdash; but written and signed. Removes ambiguity for all parties.</div>
+      </div>
+      <div class="sha-item">
+        <div class="sha-item-title">4 &middot; Buyback formula confirmed</div>
+        <div class="sha-item-body">DGC can buy Daniel out at 4&times; EBITDA &times; his equity % at any time from Year 5. The formula is written into the agreement &mdash; no negotiation, no dispute, calculated from audited accounts.</div>
+      </div>
+      <div class="sha-item">
+        <div class="sha-item-title">5 &middot; Reserved matters</div>
+        <div class="sha-item-body">Both Ash and Harry must agree in writing before: taking on debt above &pound;500k, selling the business or a material asset, issuing new shares, or changing the dividend policy. Daniel is notified but has no veto.</div>
+      </div>
+      <div class="sha-item green">
+        <div class="sha-item-title">Cost &amp; what comes first</div>
+        <div class="sha-item-body">IoM solicitor &mdash; approx. &pound;2,000 &mdash; 2&ndash;3 weeks. Accountant valuation note at share issuance (approx. &pound;300). Both required before money moves. SHA protects DGC as much as it protects Daniel.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    DGC Ltd &middot; Isle of Man &middot; June 2026 &middot; Private &amp; confidential &middot; For Ash Aziz and Harry Harrison only<br>
+    Figures are projections based on 10% EBITDA margin (optimistic case), 50% profit distribution, 4&times; EBITDA valuation, 0% IoM corporate tax.<br>
+    Not financial advice. Subject to shareholders agreement and accountant sign-off.
+  </div>
+</div>
+
+<script>
+var DEALS={
+  100:{
+    inv:'£100k',eq:'7%',ann:'£35k/yr',payback:'Year 5',exit17:'£803k',
+    annDiv:[0,14,18,21,25,28,32,35,35,35,35,35,35,35,35,35,35,35],
+    cumDiv:[0,14,32,53,78,106,138,173,208,243,278,313,348,383,418,453,488,523],
+    stake: [84,112,140,168,196,224,252,280,280,280,280,280,280,280,280,280,280,280],
+    exit:  [84,126,172,221,274,330,390,453,488,523,558,593,628,663,698,733,768,803],
+    inv_ref:100,
+    sepLabel:'— £10M/yr held flat · £35k/yr to Daniel in perpetuity —',
+    rows:[
+      {yr:'Now',fy:'2026',to:'£3.0M',cv:'£1.2M',eb:'£300k',dist:'—',ann:'—',cum:'—',stake:'£84k',exit:'£84k',cl:'grace'},
+      {yr:'Y1', fy:'2027',to:'£4.0M',cv:'£1.6M',eb:'£400k',dist:'£200k',ann:'£14k',cum:'£14k',stake:'£112k',exit:'£126k',cl:''},
+      {yr:'Y2', fy:'2028',to:'£5.0M',cv:'£2.0M',eb:'£500k',dist:'£250k',ann:'£18k',cum:'£32k',stake:'£140k',exit:'£172k',cl:''},
+      {yr:'Y3', fy:'2029',to:'£6.0M',cv:'£2.4M',eb:'£600k',dist:'£300k',ann:'£21k',cum:'£53k',stake:'£168k',exit:'£221k',cl:''},
+      {yr:'Y4', fy:'2030',to:'£7.0M',cv:'£2.8M',eb:'£700k',dist:'£350k',ann:'£25k',cum:'£78k',stake:'£196k',exit:'£274k',cl:''},
+      {yr:'Y5',fy:'2031',to:'£8.0M',cv:'£3.2M',eb:'£800k',dist:'£400k',ann:'£28k',cum:'£106k ✓',stake:'£224k',exit:'£330k',cl:'payback'},
+      {yr:'Y6', fy:'2032',to:'£9.0M',cv:'£3.6M',eb:'£900k',dist:'£450k',ann:'£32k',cum:'£138k',stake:'£252k',exit:'£390k',cl:''},
+      {yr:'Y7', fy:'2033',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£35k',cum:'£173k',stake:'£280k',exit:'£453k',cl:''},
+      {sep:true},
+      {yr:'Y8', fy:'2034',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£35k',cum:'£208k',stake:'£280k',exit:'£488k',cl:'plateau'},
+      {yr:'Y9', fy:'2035',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£35k',cum:'£243k',stake:'£280k',exit:'£523k',cl:'plateau'},
+      {yr:'Y10',fy:'2036',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£35k',cum:'£278k',stake:'£280k',exit:'£558k',cl:'plateau'},
+      {yr:'Y11',fy:'2037',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£35k',cum:'£313k',stake:'£280k',exit:'£593k',cl:'plateau'},
+      {yr:'Y12',fy:'2038',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£35k',cum:'£348k',stake:'£280k',exit:'£628k',cl:'plateau'},
+      {yr:'Y13',fy:'2039',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£35k',cum:'£383k',stake:'£280k',exit:'£663k',cl:'plateau'},
+      {yr:'Y14',fy:'2040',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£35k',cum:'£418k',stake:'£280k',exit:'£698k',cl:'plateau'},
+      {yr:'Y15',fy:'2041',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£35k',cum:'£453k',stake:'£280k',exit:'£733k',cl:'plateau'},
+      {yr:'Y16',fy:'2042',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£35k',cum:'£488k',stake:'£280k',exit:'£768k',cl:'plateau'},
+      {yr:'Y17',fy:'2043',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£35k',cum:'£523k',stake:'£280k',exit:'£803k',cl:'plateau'}
+    ]
+  },
+  150:{
+    inv:'£150k',eq:'10%',ann:'£50k/yr',payback:'Year 5',exit17:'£1.145M',
+    annDiv:[0,20,25,30,35,40,45,50,50,50,50,50,50,50,50,50,50,50],
+    cumDiv:[0,20,45,75,110,150,195,245,295,345,395,445,495,545,595,645,695,745],
+    stake: [120,160,200,240,280,320,360,400,400,400,400,400,400,400,400,400,400,400],
+    exit:  [120,180,245,315,390,470,555,645,695,745,795,845,895,945,995,1045,1095,1145],
+    inv_ref:150,
+    sepLabel:'— £10M/yr held flat · £50k/yr to Daniel in perpetuity —',
+    rows:[
+      {yr:'Now',fy:'2026',to:'£3.0M',cv:'£1.2M',eb:'£300k',dist:'—',ann:'—',cum:'—',stake:'£120k',exit:'£120k',cl:'grace'},
+      {yr:'Y1', fy:'2027',to:'£4.0M',cv:'£1.6M',eb:'£400k',dist:'£200k',ann:'£20k',cum:'£20k',stake:'£160k',exit:'£180k',cl:''},
+      {yr:'Y2', fy:'2028',to:'£5.0M',cv:'£2.0M',eb:'£500k',dist:'£250k',ann:'£25k',cum:'£45k',stake:'£200k',exit:'£245k',cl:''},
+      {yr:'Y3', fy:'2029',to:'£6.0M',cv:'£2.4M',eb:'£600k',dist:'£300k',ann:'£30k',cum:'£75k',stake:'£240k',exit:'£315k',cl:''},
+      {yr:'Y4', fy:'2030',to:'£7.0M',cv:'£2.8M',eb:'£700k',dist:'£350k',ann:'£35k',cum:'£110k',stake:'£280k',exit:'£390k',cl:''},
+      {yr:'Y5',fy:'2031',to:'£8.0M',cv:'£3.2M',eb:'£800k',dist:'£400k',ann:'£40k',cum:'£150k ✓',stake:'£320k',exit:'£470k',cl:'payback'},
+      {yr:'Y6', fy:'2032',to:'£9.0M',cv:'£3.6M',eb:'£900k',dist:'£450k',ann:'£45k',cum:'£195k',stake:'£360k',exit:'£555k',cl:''},
+      {yr:'Y7', fy:'2033',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£245k',stake:'£400k',exit:'£645k',cl:''},
+      {sep:true},
+      {yr:'Y8', fy:'2034',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£295k',stake:'£400k',exit:'£695k',cl:'plateau'},
+      {yr:'Y9', fy:'2035',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£345k',stake:'£400k',exit:'£745k',cl:'plateau'},
+      {yr:'Y10',fy:'2036',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£395k',stake:'£400k',exit:'£795k',cl:'plateau'},
+      {yr:'Y11',fy:'2037',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£445k',stake:'£400k',exit:'£845k',cl:'plateau'},
+      {yr:'Y12',fy:'2038',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£495k',stake:'£400k',exit:'£895k',cl:'plateau'},
+      {yr:'Y13',fy:'2039',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£545k',stake:'£400k',exit:'£945k',cl:'plateau'},
+      {yr:'Y14',fy:'2040',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£595k',stake:'£400k',exit:'£995k',cl:'plateau'},
+      {yr:'Y15',fy:'2041',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£645k',stake:'£400k',exit:'£1.045M',cl:'plateau'},
+      {yr:'Y16',fy:'2042',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£695k',stake:'£400k',exit:'£1.095M',cl:'plateau'},
+      {yr:'Y17',fy:'2043',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£745k',stake:'£400k',exit:'£1.145M',cl:'plateau'}
+    ]
+  }
+};
+
+var currentDeal=100;
+var chart=null;
+var LABELS=['Now','Y1','Y2','Y3','Y4','Y5','Y6','Y7','Y8','Y9','Y10','Y11','Y12','Y13','Y14','Y15','Y16','Y17'];
+
+function checkPwd(){
+  if(document.getElementById('pwd').value==='0412'){
+    document.getElementById('gate').style.display='none';
+    document.getElementById('main').style.display='block';
+    renderAll(100);
+  }else{
+    document.getElementById('err').style.display='block';
+    document.getElementById('pwd').value='';
+    document.getElementById('pwd').focus();
+  }
+}
+
+function setDeal(amt){
+  currentDeal=amt;
+  document.getElementById('btn100').classList.toggle('active',amt===100);
+  document.getElementById('btn150').classList.toggle('active',amt===150);
+  renderAll(amt);
+}
+
+function renderAll(amt){
+  var d=DEALS[amt];
+  renderMetrics(d);
+  renderChart(d);
+  renderTable(d);
+}
+
+function renderMetrics(d){
+  document.getElementById('metrics').innerHTML=
+    '<div class="metric"><div class="metric-label">Daniel invests</div><div class="metric-val">'+d.inv+'</div><div class="metric-sub">one-time &middot; no repayment</div></div>'+
+    '<div class="metric"><div class="metric-label">Equity issued</div><div class="metric-val">'+d.eq+'</div><div class="metric-sub">ordinary shares</div></div>'+
+    '<div class="metric"><div class="metric-label">Annual income at plateau</div><div class="metric-val">'+d.ann+'</div><div class="metric-sub">from Year 7 &middot; forever</div></div>'+
+    '<div class="metric"><div class="metric-label">Total exit at Year 17</div><div class="metric-val">'+d.exit17+'</div><div class="metric-sub">dividends + stake value</div></div>';
+}
+
+function renderChart(d){
+  var ctx=document.getElementById('mainChart').getContext('2d');
+  var bg=d.annDiv.map(function(_,i){return i===0?'rgba(0,0,0,0)':i<=7?'#85B7EB':'#9FE1CB';});
+  var ref=LABELS.map(function(){return d.inv_ref;});
+  if(chart)chart.destroy();
+  chart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:LABELS,
+      datasets:[
+        {label:'Annual dividend',type:'bar',data:d.annDiv,backgroundColor:bg,borderRadius:3,order:5},
+        {label:'Cumulative dividends',type:'line',data:d.cumDiv,borderColor:'#22a06b',backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#22a06b',tension:0.3,order:1},
+        {label:'Stake / buyback',type:'line',data:d.stake,borderColor:'#EF9F27',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],pointRadius:3,pointBackgroundColor:'#EF9F27',pointStyle:'rectRot',tension:0.2,order:2},
+        {label:'Total exit value',type:'line',data:d.exit,borderColor:'#7F77DD',backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#7F77DD',pointStyle:'triangle',tension:0.3,order:3},
+        {label:'Investment',type:'line',data:ref,borderColor:'#ccc',backgroundColor:'transparent',borderWidth:1,borderDash:[4,4],pointRadius:0,order:4}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:function(c){return ' '+c.dataset.label+': £'+Math.round(c.parsed.y)+'k';}}}
+      },
+      scales:{
+        y:{beginAtZero:true,ticks:{callback:function(v){return '£'+Math.round(v)+'k';},color:'#888780',font:{size:10}},grid:{color:'rgba(136,135,128,0.08)'}},
+        x:{ticks:{color:'#888780',font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}}
+      }
+    }
+  });
+}
+
+function renderTable(d){
+  var html='';
+  d.rows.forEach(function(r){
+    if(r.sep){
+      html+='<tr class="sep"><td colspan="10">'+d.sepLabel+'</td></tr>';
+      return;
+    }
+    html+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.cv+'</td><td>'+r.eb+'</td><td>'+r.dist+'</td><td>'+r.ann+'</td><td>'+r.cum+'</td><td>'+r.stake+'</td><td>'+r.exit+'</td></tr>';
+  });
+  document.getElementById('tableBody').innerHTML=html;
+}
+</script>
+</body>
+</html>
