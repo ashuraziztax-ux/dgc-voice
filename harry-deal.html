@@ -112,7 +112,7 @@ tr.plateau td{color:#888780}
       <table>
         <thead>
           <tr>
-            <th>Year</th><th>FY</th><th>Turnover</th><th>Co. value</th><th>Profit</th><th>Take out</th><th>Daniel &pound;/yr</th><th>Daniel total</th><th>Stake / buyback</th><th>Exit total</th>
+            <th>Year</th><th>FY</th><th>Turnover</th><th>Co. value</th><th>Profit</th><th>DGC profit total</th><th>Take out</th><th>Daniel &pound;/yr</th><th>Daniel total</th><th>Stake / buyback</th><th>Exit total</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -230,6 +230,7 @@ var DEALS={
   }
 };
 
+var DGC_CUM=['£300k','£700k','£1.2M','£1.8M','£2.5M','£3.3M','£4.2M','£5.2M','£6.2M','£7.2M','£8.2M','£9.2M','£10.2M','£11.2M','£12.2M','£13.2M','£14.2M','£15.2M'];
 var currentDeal=150;
 var chart=null;
 var LABELS=['Now','Y1','Y2','Y3','Y4','Y5','Y6','Y7','Y8','Y9','Y10','Y11','Y12','Y13','Y14','Y15','Y16','Y17'];
@@ -301,12 +302,14 @@ function renderChart(d){
 
 function renderTable(d){
   var html='';
+  var idx=0;
   d.rows.forEach(function(r){
     if(r.sep){
-      html+='<tr class="sep"><td colspan="10">'+d.sepLabel+'</td></tr>';
+      html+='<tr class="sep"><td colspan="11">'+d.sepLabel+'</td></tr>';
       return;
     }
-    html+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.cv+'</td><td>'+r.eb+'</td><td>'+r.dist+'</td><td>'+r.ann+'</td><td>'+r.cum+'</td><td>'+r.stake+'</td><td>'+r.exit+'</td></tr>';
+    html+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.cv+'</td><td>'+r.eb+'</td><td>'+DGC_CUM[idx]+'</td><td>'+r.dist+'</td><td>'+r.ann+'</td><td>'+r.cum+'</td><td>'+r.stake+'</td><td>'+r.exit+'</td></tr>';
+    idx++;
   });
   document.getElementById('tableBody').innerHTML=html;
 }
