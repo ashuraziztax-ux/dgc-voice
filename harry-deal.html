@@ -112,7 +112,7 @@ tr.plateau td{color:#888780}
       <table>
         <thead>
           <tr>
-            <th>Year</th><th>FY</th><th>Turnover</th><th>Co. value</th><th>Profit</th><th>DGC profit total</th><th>Take out</th><th>Daniel &pound;/yr</th><th>Daniel total</th><th>Stake / buyback</th><th>Exit total</th>
+            <th>Year</th><th>FY</th><th>Turnover</th><th>Co. value</th><th>Profit</th><th>Ash &amp; Harry total</th><th>Take out</th><th>Daniel &pound;/yr</th><th>Daniel total</th><th>Stake / buyback</th><th>Exit total</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -176,6 +176,7 @@ var DEALS={
     exit:  [84,126,172,221,274,330,390,453,488,523,558,593,628,663,698,733,768,803],
     inv_ref:100,
     sepLabel:'— £10M/yr held flat · £35k/yr to Daniel in perpetuity —',
+    ahCum:['—','£186k','£419k','£698k','£1.02M','£1.4M','£1.81M','£2.28M','£2.74M','£3.21M','£3.67M','£4.14M','£4.6M','£5.07M','£5.53M','£6.0M','£6.46M','£6.93M'],
     rows:[
       {yr:'Now',fy:'2026',to:'£3.0M',cv:'£1.2M',eb:'£300k',dist:'—',ann:'—',cum:'—',stake:'£84k',exit:'£84k',cl:'grace'},
       {yr:'Y1', fy:'2027',to:'£4.0M',cv:'£1.6M',eb:'£400k',dist:'£200k',ann:'£14k',cum:'£14k',stake:'£112k',exit:'£126k',cl:''},
@@ -206,6 +207,7 @@ var DEALS={
     exit:  [120,180,245,315,390,470,555,645,695,745,795,845,895,945,995,1045,1095,1145],
     inv_ref:150,
     sepLabel:'— £10M/yr held flat · £50k/yr to Daniel in perpetuity —',
+    ahCum:['—','£180k','£405k','£675k','£990k','£1.35M','£1.76M','£2.2M','£2.66M','£3.1M','£3.56M','£4.0M','£4.46M','£4.9M','£5.36M','£5.8M','£6.26M','£6.7M'],
     rows:[
       {yr:'Now',fy:'2026',to:'£3.0M',cv:'£1.2M',eb:'£300k',dist:'—',ann:'—',cum:'—',stake:'£120k',exit:'£120k',cl:'grace'},
       {yr:'Y1', fy:'2027',to:'£4.0M',cv:'£1.6M',eb:'£400k',dist:'£200k',ann:'£20k',cum:'£20k',stake:'£160k',exit:'£180k',cl:''},
@@ -230,7 +232,6 @@ var DEALS={
   }
 };
 
-var DGC_CUM=['£300k','£700k','£1.2M','£1.8M','£2.5M','£3.3M','£4.2M','£5.2M','£6.2M','£7.2M','£8.2M','£9.2M','£10.2M','£11.2M','£12.2M','£13.2M','£14.2M','£15.2M'];
 var currentDeal=150;
 var chart=null;
 var LABELS=['Now','Y1','Y2','Y3','Y4','Y5','Y6','Y7','Y8','Y9','Y10','Y11','Y12','Y13','Y14','Y15','Y16','Y17'];
@@ -308,7 +309,7 @@ function renderTable(d){
       html+='<tr class="sep"><td colspan="11">'+d.sepLabel+'</td></tr>';
       return;
     }
-    html+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.cv+'</td><td>'+r.eb+'</td><td>'+DGC_CUM[idx]+'</td><td>'+r.dist+'</td><td>'+r.ann+'</td><td>'+r.cum+'</td><td>'+r.stake+'</td><td>'+r.exit+'</td></tr>';
+    html+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.cv+'</td><td>'+r.eb+'</td><td>'+d.ahCum[idx]+'</td><td>'+r.dist+'</td><td>'+r.ann+'</td><td>'+r.cum+'</td><td>'+r.stake+'</td><td>'+r.exit+'</td></tr>';
     idx++;
   });
   document.getElementById('tableBody').innerHTML=html;
