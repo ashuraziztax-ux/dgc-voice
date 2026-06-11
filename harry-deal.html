@@ -87,8 +87,8 @@ tr.plateau td{color:#888780}
   </div>
 
   <div class="toggle">
-    <button class="active" id="btn100" onclick="setDeal(100)">£100k &middot; 7%</button>
-    <button id="btn150" onclick="setDeal(150)">£150k &middot; 10%</button>
+    <button class="active" id="btn150" onclick="setDeal(150)">£150k &middot; 10%</button>
+    <button id="btn100" onclick="setDeal(100)">£100k &middot; 7%</button>
   </div>
 
   <div class="metrics" id="metrics"></div>
@@ -229,7 +229,7 @@ var DEALS={
   }
 };
 
-var currentDeal=100;
+var currentDeal=150;
 var chart=null;
 var LABELS=['Now','Y1','Y2','Y3','Y4','Y5','Y6','Y7','Y8','Y9','Y10','Y11','Y12','Y13','Y14','Y15','Y16','Y17'];
 
@@ -237,7 +237,7 @@ function checkPwd(){
   if(document.getElementById('pwd').value==='0412'){
     document.getElementById('gate').style.display='none';
     document.getElementById('main').style.display='block';
-    renderAll(100);
+    renderAll(150);
   }else{
     document.getElementById('err').style.display='block';
     document.getElementById('pwd').value='';
