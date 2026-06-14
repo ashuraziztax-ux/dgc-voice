@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DGC — Deal Options</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a18;font-size:14px;line-height:1.5}
+#gate{position:fixed;inset:0;background:#1a1a18;display:flex;align-items:center;justify-content:center;z-index:100}
+.gate-card{background:#fff;border-radius:14px;padding:44px 40px;max-width:360px;width:90%;text-align:center}
+.gate-logo{font-size:13px;font-weight:500;letter-spacing:0.12em;color:#888780;margin-bottom:28px}
+.gate-card h1{font-size:20px;font-weight:500;margin-bottom:6px}
+.gate-card p{color:#888780;font-size:13px;margin-bottom:28px;line-height:1.6}
+.gate-card input{width:100%;padding:14px 16px;border:1px solid #e0e0d8;border-radius:9px;font-size:22px;letter-spacing:6px;text-align:center;margin-bottom:12px;outline:none;transition:border-color 0.15s}
+.gate-card input:focus{border-color:#7F77DD}
+.gate-card button{width:100%;padding:13px;background:#1a1a18;color:#fff;border:none;border-radius:9px;font-size:14px;cursor:pointer;font-weight:500}
+.gate-err{color:#E24B4A;font-size:12px;margin-top:10px;display:none}
+#main{display:none;max-width:960px;margin:0 auto;padding:36px 20px 80px}
+.header{margin-bottom:28px}
+.header-eyebrow{font-size:11px;color:#888780;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+.header-title{font-size:24px;font-weight:500}
+.header-sub{font-size:14px;color:#888780;margin-top:5px}
+.tabs{display:flex;gap:4px;margin-bottom:28px;background:#e8e8e2;border-radius:10px;padding:3px}
+.tab-btn{flex:1;padding:10px 12px;border:none;background:transparent;border-radius:7px;font-size:13px;cursor:pointer;color:#888780;transition:all 0.15s;font-weight:400;line-height:1.3;text-align:center}
+.tab-btn.active{background:#1a1a18;color:#fff;font-weight:500}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.intro-box{background:#fff;border:0.5px solid #e0e0d8;border-radius:12px;padding:22px 24px;margin-bottom:22px}
+.intro-box h2{font-size:16px;font-weight:500;margin-bottom:10px}
+.intro-box p{font-size:13px;color:#4a4a47;line-height:1.7;margin-bottom:8px}
+.intro-box p:last-child{margin-bottom:0}
+.intro-badge{display:inline-block;font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;margin-bottom:12px}
+.badge-orig{background:#f0f0fa;color:#534AB7}
+.badge-ratch{background:#FAEEDA;color:#854F0B}
+.badge-loan{background:#e1f5ee;color:#0f6e56}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+.metric{background:#1a1a18;color:#fff;border-radius:11px;padding:18px 20px}
+.metric-label{font-size:11px;color:#706f6b;margin-bottom:7px;line-height:1.4}
+.metric-val{font-size:20px;font-weight:500;line-height:1.2}
+.metric-sub{font-size:11px;color:#504f4c;margin-top:5px}
+.card{background:#fff;border:0.5px solid #e0e0d8;border-radius:12px;padding:22px;margin-bottom:22px}
+.card-title{font-size:14px;font-weight:500;margin-bottom:16px}
+.card-sub{font-size:12px;color:#888780;margin-bottom:14px;line-height:1.6}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:12px;font-size:12px;color:#888780}
+.legend span{display:flex;align-items:center;gap:5px}
+.ls{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.ll{width:16px;height:0;flex-shrink:0}
+.chart-wrap{position:relative;width:100%;height:250px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:right;padding:7px 10px;font-weight:500;color:#888780;border-bottom:1px solid #e0e0d8;font-size:11px;white-space:nowrap}
+th:first-child,th:nth-child(2){text-align:left}
+td{text-align:right;padding:7px 10px;border-bottom:0.5px solid #f0f0ea;color:#3a3a38;white-space:nowrap}
+td:first-child,td:nth-child(2){text-align:left}
+tr.grace td{color:#bbb}
+tr.payback{background:#f0fdf4}
+tr.payback td{color:#0f6e56;font-weight:500}
+tr.sep td{background:#f7f7f2;color:#888780;font-size:11px;text-align:center;font-style:italic;padding:6px;border:none}
+tr.plateau td{color:#888780}
+tr.ratchet-row td{background:#fff8ee;color:#854F0B;font-size:11px;font-style:italic;text-align:center}
+tr.done-row td{color:#bbb}
+tr.cap-hit td{background:#f0fdf4;color:#0f6e56;font-weight:500}
+tr.ended-row td{color:#bbb}
+.table-note{font-size:11px;color:#aaa;margin-top:10px;line-height:1.6}
+.section-title{font-size:14px;font-weight:500;margin-bottom:16px}
+.steps{list-style:none;counter-reset:steps}
+.steps li{counter-increment:steps;display:flex;gap:14px;margin-bottom:16px;align-items:flex-start}
+.steps li::before{content:counter(steps);min-width:28px;height:28px;background:#1a1a18;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;margin-top:1px}
+.steps li .step-body{flex:1}
+.steps li .step-title{font-weight:500;font-size:13px;margin-bottom:3px}
+.steps li .step-text{font-size:13px;color:#5a5a56;line-height:1.6}
+.pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+.pros-box,.cons-box{border-radius:9px;padding:18px}
+.pros-box{background:#f0fdf4}
+.cons-box{background:#fef2f2}
+.pros-box h3{font-size:12px;font-weight:500;color:#0f6e56;margin-bottom:12px;letter-spacing:0.04em}
+.cons-box h3{font-size:12px;font-weight:500;color:#b91c1c;margin-bottom:12px;letter-spacing:0.04em}
+.pc-list{list-style:none}
+.pc-list li{font-size:12px;color:#374151;line-height:1.55;margin-bottom:8px;padding-left:14px;position:relative}
+.pc-list li::before{position:absolute;left:0;top:1px;font-size:11px}
+.pros-box .pc-list li::before{content:'✓';color:#0f6e56}
+.cons-box .pc-list li::before{content:'✗';color:#b91c1c}
+.board-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+.board-card{background:#f7f7f2;border-radius:9px;padding:16px}
+.board-book{font-size:10px;font-weight:500;letter-spacing:0.06em;color:#888780;margin-bottom:4px}
+.board-name{font-size:13px;font-weight:500;margin-bottom:4px}
+.board-verdict{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;margin-bottom:8px}
+.verdict-ok{background:#e8f5e9;color:#1b5e20}
+.verdict-warn{background:#fff8e1;color:#7c4e00}
+.verdict-caution{background:#fce4ec;color:#880e4f}
+.verdict-neutral{background:#e8eaf6;color:#283593}
+.board-text{font-size:12px;color:#5a5a56;line-height:1.6}
+.footer{font-size:11px;color:#aaa;text-align:center;margin-top:44px;line-height:1.8}
+.compare-box{background:#1a1a18;color:#fff;border-radius:12px;padding:18px 22px;margin-bottom:22px}
+.compare-box h3{font-size:13px;font-weight:500;margin-bottom:10px;color:#9FE1CB}
+.compare-box p{font-size:12px;color:#888780;line-height:1.6}
+.compare-box strong{color:#e0e0d8}
+@media(max-width:640px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .pros-cons,.board-grid{grid-template-columns:1fr}
+  .tab-btn{font-size:11px;padding:8px 6px}
+  th,td{padding:5px 6px;font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">DGC LTD</div>
+    <h1>Private document</h1>
+    <p>This proposal is confidential.<br>Enter the access code to continue.</p>
+    <input type="password" id="pwd" placeholder="&bull;&bull;&bull;&bull;" maxlength="8" autofocus onkeydown="if(event.key==='Enter')unlock()">
+    <button onclick="unlock()">View proposals</button>
+    <div class="gate-err" id="err">Incorrect code &mdash; try again.</div>
+  </div>
+</div>
+
+<div id="main">
+  <div class="header">
+    <div class="header-eyebrow">Private &amp; confidential &middot; June 2026</div>
+    <div class="header-title">DGC &mdash; Three Deal Options</div>
+    <div class="header-sub">Original proposal plus two structured alternatives &middot; Ash Aziz &middot; DGC Ltd</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('orig')">Original &mdash; £150k / 10%</button>
+    <button class="tab-btn" onclick="showTab('ratch')">Option A &mdash; Ratchet</button>
+    <button class="tab-btn" onclick="showTab('loan')">Option B &mdash; Profit-share loan</button>
+  </div>
+
+  <!-- ============================================================ ORIGINAL -->
+  <div id="tab-orig" class="tab-panel active">
+
+    <div class="intro-box">
+      <span class="intro-badge badge-orig">Original proposal</span>
+      <h2>£150,000 for 10% of DGC Ltd &mdash; ordinary shares</h2>
+      <p>Daniel puts in £150,000. In return he gets 10% of DGC Ltd as ordinary shares &mdash; a permanent slice of the company. He owns that 10% for as long as he holds the shares. Each year when DGC pays out profits, he gets 10% of whatever is paid out. If DGC is ever sold, he gets 10% of the sale price. His shares grow in value as DGC grows.</p>
+      <p>There is no repayment date and no guaranteed return &mdash; his income depends entirely on how DGC performs. A shareholders agreement is signed before any money moves, which sets out the rules clearly for everyone.</p>
+      <p>The cap table after the deal: <strong>Ash 45% &middot; Harry 45% &middot; Daniel 10%</strong>. All three are owners.</p>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Daniel invests</div><div class="metric-val">£150k</div><div class="metric-sub">one-time &middot; no repayment</div></div>
+      <div class="metric"><div class="metric-label">Equity issued</div><div class="metric-val">10%</div><div class="metric-sub">ordinary shares &middot; permanent</div></div>
+      <div class="metric"><div class="metric-label">Income at plateau</div><div class="metric-val">£50k/yr</div><div class="metric-sub">from Year 7 &middot; forever</div></div>
+      <div class="metric"><div class="metric-label">Exit total at Year 17</div><div class="metric-val">£1.145M</div><div class="metric-sub">dividends + stake value</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Return projection &mdash; 18 years (10% profit margin, optimistic case)</div>
+      <div class="legend">
+        <span><span class="ls" style="background:#85B7EB"></span>Annual take out &mdash; growth phase</span>
+        <span><span class="ls" style="background:#9FE1CB"></span>Annual take out &mdash; plateau</span>
+        <span><span class="ll" style="border-top:2.5px solid #22a06b"></span>Cumulative total</span>
+        <span><span class="ll" style="border-top:2px dashed #EF9F27"></span>Share value at 10%</span>
+        <span><span class="ll" style="border-top:2.5px solid #7F77DD"></span>Total exit value</span>
+        <span><span class="ll" style="border-top:2px dashed #ccc"></span>Investment</span>
+      </div>
+      <div class="chart-wrap"><canvas id="c1" role="img" aria-label="18-year projection for original 10% equity deal"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Year by year breakdown</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Year</th><th>FY</th><th>Turnover</th><th>Co. value</th><th>Profit</th><th>Take out</th><th>Daniel/yr</th><th>Daniel total</th><th>Share value</th><th>Exit total</th></tr></thead>
+          <tbody id="t1"></tbody>
+        </table>
+      </div>
+      <div class="table-note"><strong>Profit</strong> = what the business earns after running costs. &middot; <strong>Take out</strong> = 50% of profit paid to shareholders each year. &middot; <strong>Share value</strong> = what DGC would pay to buy Daniel out (4&times; profit &times; 10%). &middot; <strong>Exit total</strong> = all dividends received + current stake value. &middot; Green row = investment fully paid back through dividends alone. &middot; 0% Isle of Man corporate tax throughout.</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">How this deal works &mdash; step by step</div>
+      <ol class="steps">
+        <li><div class="step-body"><div class="step-title">Daniel writes a cheque for £150,000</div><div class="step-text">The money goes directly into DGC Ltd as working capital. DGC uses it to stabilise cash flow, fund equipment, or bridge contracts. Daniel receives newly issued ordinary shares &mdash; 10% of the total company.</div></div></li>
+        <li><div class="step-body"><div class="step-title">A shareholders agreement is signed first (before any money moves)</div><div class="step-text">An Isle of Man solicitor drafts a short agreement (approx. £2,000, 2&ndash;3 weeks) that sets the rules: how dividends are decided, how Daniel can exit, what decisions require notice to him, and a formula for buying him out. This protects everyone &mdash; not just Daniel.</div></div></li>
+        <li><div class="step-body"><div class="step-title">Year 1 &mdash; no dividends, business absorbs the capital</div><div class="step-text">The first year is a grace period. No dividends are paid in the first trading year. The money works in the business. Daniel is a shareholder but receives nothing yet &mdash; this is agreed upfront.</div></div></li>
+        <li><div class="step-body"><div class="step-title">From Year 2 onwards &mdash; Daniel receives 10% of whatever is paid out</div><div class="step-text">Each year-end, Ash and Harry review DGC&rsquo;s accounts and decide how much profit to distribute (target: 40&ndash;50%). Daniel automatically receives 10% of that amount. At £5M turnover that&rsquo;s around £25k/year. At £10M turnover it reaches £50k/year.</div></div></li>
+        <li><div class="step-body"><div class="step-title">Year 5 &mdash; Daniel has received his £150k back through dividends alone</div><div class="step-text">By Year 5 (projecting 10% profit margin), cumulative dividends reach £150,000 &mdash; Daniel&rsquo;s original investment is fully returned just from his share of profits. His shares are still worth £320k. Everything from here is pure upside for him.</div></div></li>
+        <li><div class="step-body"><div class="step-title">From Year 7 onwards &mdash; business plateaus, Daniel earns £50k/year in perpetuity</div><div class="step-text">Once DGC reaches £10M turnover, the model holds flat. Daniel receives £50,000 per year, every year, for as long as he holds his shares. This continues indefinitely &mdash; for his lifetime, and potentially his estate&rsquo;s.</div></div></li>
+        <li><div class="step-body"><div class="step-title">DGC can buy Daniel out from Year 5 onwards</div><div class="step-text">Ash and Harry have the option (not the obligation) to purchase Daniel&rsquo;s shares at any time from Year 5 using the formula: 4&times; annual profit &times; 10%. At plateau that&rsquo;s approximately £400,000. Daniel cannot force a buyout &mdash; only DGC can trigger this.</div></div></li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Honest pros and cons</div>
+      <div class="pros-cons">
+        <div class="pros-box">
+          <h3>WHAT WORKS</h3>
+          <ul class="pc-list">
+            <li>Cleanest, simplest structure. Daniel owns shares like any shareholder. No ambiguity about what he holds.</li>
+            <li>Daniel has maximum upside &mdash; his stake grows in value as DGC grows. If DGC hits £10M he&rsquo;s sitting on a £400k asset plus ongoing income.</li>
+            <li>Strong alignment: Daniel wants DGC to grow because his shares grow with it. He&rsquo;s on the same team.</li>
+            <li>IoM 0% corporate tax means every penny of profit flows to shareholders &mdash; no tax drag reducing Daniel&rsquo;s return.</li>
+            <li>SHA protects DGC &mdash; no board seat, no veto, no interference. Daniel is a silent partner.</li>
+          </ul>
+        </div>
+        <div class="cons-box">
+          <h3>WHAT TO WATCH</h3>
+          <ul class="pc-list">
+            <li>10% is permanent. If DGC reaches £10M turnover, that 10% is worth £400k in shares and pays £50k/year forever. That is a very significant long-term cost for a £150k injection today.</li>
+            <li>Daniel&rsquo;s total return over 17 years (dividends + exit stake) is approximately £1.89M on £150k &mdash; a 12.6&times; return. This is generous given the risk profile of a profitable £3M business.</li>
+            <li>Growth projections are estimates. If DGC doesn&rsquo;t grow as fast, Daniel&rsquo;s income is lower &mdash; but his 10% stake remains, regardless of performance.</li>
+            <li>Daniel is now permanently on DGC&rsquo;s cap table. Any future investment rounds, sales, or restructuring must account for his 10%.</li>
+            <li>SHA cost ~£2,000 upfront. Accountant valuation note ~£300. Small but worth noting.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Board review &mdash; six experts, six verdicts</div>
+      <div class="card-sub">What do the books say? Six frameworks from the vault applied to this deal.</div>
+      <div class="board-grid">
+        <div class="board-card">
+          <div class="board-book">ANGEL INVESTING</div>
+          <div class="board-name">David S. Rose</div>
+          <span class="board-verdict verdict-warn">Below-market but defensible</span>
+          <p class="board-text">Angels typically expect 20&ndash;30% at seed stage &mdash; but DGC is not a startup. At £3M revenue with positive profit, the risk is far lower. Daniel&rsquo;s 12&times; projected return is above what the risk justifies. The SHA is well-structured. Rose&rsquo;s core warning: <em>&ldquo;You&rsquo;re selling equity at your cheapest point. Every 1% you give away today could be worth £40k+ in Year 7.&rdquo;</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">THE FOUNDER'S DILEMMAS</div>
+          <div class="board-name">Noam Wasserman</div>
+          <span class="board-verdict verdict-caution">Classic founders&rsquo; timing error</span>
+          <p class="board-text">Harvard data: 65% of founders who sell equity at the £3M&ndash;£10M growth stage later call it their biggest financial regret. DGC is at the inflection point &mdash; the most expensive 10% Ash will ever give away. Wasserman&rsquo;s question: <em>does DGC actually need this capital to grow? If DGC can grow without it, this is the most expensive £150k ever borrowed.</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">DEALMAKING</div>
+          <div class="board-name">Guhan Subramanian</div>
+          <span class="board-verdict verdict-ok">Anchor is well-set</span>
+          <p class="board-text">Ash anchored at £150k for 10%, implying £1.5M valuation. Research shows first-movers who anchor above their target land better outcomes. The SHA requirement is a smart &ldquo;setup move&rdquo; &mdash; it signals seriousness and filters casual interest. Subramanian&rsquo;s note: <em>&ldquo;Don&rsquo;t renegotiate away from this anchor unprompted. If Daniel accepts it, the anchor worked.&rdquo;</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">NEVER SPLIT THE DIFFERENCE</div>
+          <div class="board-name">Chris Voss</div>
+          <span class="board-verdict verdict-ok">Emotionally well-structured</span>
+          <p class="board-text">The deal honours Daniel&rsquo;s hidden driver: not just return, but participation in DGC&rsquo;s story. Voss calls this the Black Swan. Before presenting numbers, label the emotion: <em>&ldquo;It sounds like you want to be part of this for more than just the money.&rdquo;</em> Let Daniel confirm his own motivation &mdash; then the deal sells itself.</p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">GETTING TO YES</div>
+          <div class="board-name">Roger Fisher &amp; William Ury</div>
+          <span class="board-verdict verdict-ok">Principled &mdash; both interests served</span>
+          <p class="board-text">Both parties&rsquo; underlying interests are met: DGC gets capital; Daniel gets return and participation. Terms are based on objective criteria (4&times; EBITDA, IoM law, standard SHA provisions). Fisher&rsquo;s one addition: <em>document the dividend policy as a written intention, even though it&rsquo;s not a legal obligation. This pre-empts the biggest future question: &ldquo;when do I get paid?&rdquo;</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">VENTURE DEALS</div>
+          <div class="board-name">Brad Feld &amp; Jason Mendelson</div>
+          <span class="board-verdict verdict-ok">Clean structure</span>
+          <p class="board-text">Ordinary shares, no liquidation preference, no participating preferred &mdash; this is clean. The SHA terms are lightweight: no board seat, no veto rights, no aggressive drag-along. Feld&rsquo;s one flag: <em>add a simple no-shop clause during the SHA drafting period, confirming DGC won&rsquo;t approach other investors simultaneously. Standard practice. Costs nothing.</em></p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-orig -->
+
+  <!-- ============================================================ RATCHET -->
+  <div id="tab-ratch" class="tab-panel">
+
+    <div class="intro-box">
+      <span class="intro-badge badge-ratch">Option A &mdash; Ratchet equity</span>
+      <h2>£150,000 for 10% &mdash; drops to 5% once Daniel gets his money back</h2>
+      <p>This is the original deal with one important addition: a <strong>ratchet clause</strong>. Daniel gets 10% of DGC as ordinary shares, exactly as in the original deal. Everything works the same &mdash; SHA, dividends, buyback formula. The only difference is a built-in rule: once DGC has paid Daniel back his original £150,000 through dividends (which happens around Year 5), DGC pays Daniel an additional £75,000 to buy back half his shares. He drops from 10% to 5%.</p>
+      <p>From Year 6 onwards, Daniel holds 5% of DGC permanently &mdash; still a meaningful stake, still growing with the business, but DGC has recovered half the equity once the debt has been repaid through profits.</p>
+      <p>Think of it like this: <strong>Phase 1</strong> (Years 1&ndash;5) &mdash; Daniel at 10%, DGC growing and repaying him. <strong>Phase 2</strong> (Year 6 onwards) &mdash; Daniel at 5%, smaller slice, much stronger business.</p>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Daniel invests</div><div class="metric-val">£150k</div><div class="metric-sub">one-time &middot; no repayment</div></div>
+      <div class="metric"><div class="metric-label">Starting equity</div><div class="metric-val">10% &rarr; 5%</div><div class="metric-sub">drops at Year 5 ratchet</div></div>
+      <div class="metric"><div class="metric-label">Ratchet cost to DGC</div><div class="metric-val">£75k</div><div class="metric-sub">paid once at Year 5</div></div>
+      <div class="metric"><div class="metric-label">Daniel&rsquo;s total at Year 17</div><div class="metric-val">£723k</div><div class="metric-sub">dividends + buyback + stake</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Return projection &mdash; 18 years (10% profit margin, optimistic case)</div>
+      <div class="legend">
+        <span><span class="ls" style="background:#85B7EB"></span>Dividends at 10% (Phase 1)</span>
+        <span><span class="ls" style="background:#EF9F27"></span>Buyback at Year 5</span>
+        <span><span class="ls" style="background:#9FE1CB"></span>Dividends at 5% (Phase 2)</span>
+        <span><span class="ll" style="border-top:2.5px solid #22a06b"></span>Total cash to Daniel</span>
+        <span><span class="ll" style="border-top:2px dashed #7F77DD"></span>Stake value (10% then 5%)</span>
+        <span><span class="ll" style="border-top:2px dashed #ccc"></span>Investment</span>
+      </div>
+      <div class="chart-wrap"><canvas id="c2" role="img" aria-label="18-year ratchet deal projection"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Year by year breakdown</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Year</th><th>FY</th><th>Turnover</th><th>Co. value</th><th>Profit</th><th>Take out</th><th>Daniel/yr</th><th>Daniel total</th><th>Stake value</th><th>Exit total</th></tr></thead>
+          <tbody id="t2"></tbody>
+        </table>
+      </div>
+      <div class="table-note"><strong>Ratchet trigger:</strong> Once Daniel&rsquo;s cumulative dividends reach £150k (his original investment), DGC pays a one-off £75k to buy back 5% of his shares &mdash; reducing him from 10% to 5%. &middot; <strong>Exit total</strong> = total cash received (dividends + £75k buyback) + current stake value. &middot; Green row = payback point and ratchet trigger year.</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">How this deal works &mdash; step by step</div>
+      <ol class="steps">
+        <li><div class="step-body"><div class="step-title">Exactly the same as the original deal &mdash; to begin with</div><div class="step-text">Daniel invests £150,000, gets 10% ordinary shares, SHA is signed. Years 1&ndash;5 are identical to the original proposal. Daniel receives 10% of all profit distributions.</div></div></li>
+        <li><div class="step-body"><div class="step-title">The ratchet clause is written into the SHA</div><div class="step-text">One additional clause in the SHA states: &ldquo;Once cumulative dividend distributions to Daniel Aziz (verified by audited accounts) reach £150,000, DGC Ltd has the right to purchase 5% of Daniel Aziz&rsquo;s ordinary shares at par value (£75,000) within 90 days.&rdquo; This is agreed upfront before any money moves.</div></div></li>
+        <li><div class="step-body"><div class="step-title">Year 5 &mdash; the payback point and ratchet trigger</div><div class="step-text">By Year 5, Daniel&rsquo;s cumulative dividends reach £150,000 &mdash; he has received his full investment back through profit distributions alone. The ratchet now triggers. DGC pays Daniel a further £75,000 in cash and cancels 5% of his shares. He now holds 5% of DGC.</div></div></li>
+        <li><div class="step-body"><div class="step-title">In Year 5 alone, DGC pays Daniel £115,000</div><div class="step-text">That year&rsquo;s dividend (£40k as 10% of the distribution) plus the £75k buyback payment = £115,000 total leaving DGC in a single year. This is the key cash flow point Ash must plan for &mdash; make sure DGC can absorb it.</div></div></li>
+        <li><div class="step-body"><div class="step-title">From Year 6 onwards &mdash; Daniel at 5%</div><div class="step-text">Daniel now owns 5% of DGC permanently. His annual income from dividends is half what it was: around £23k/year in Year 6, rising to £25k/year at plateau. His stake is worth 5% of DGC&rsquo;s value &mdash; approximately £200,000 at the £10M plateau.</div></div></li>
+        <li><div class="step-body"><div class="step-title">DGC buyout option still applies from Year 5</div><div class="step-text">If DGC wants to buy Daniel out entirely from Year 5, the buyback formula applies to his remaining 5%: 4&times; profit &times; 5%. At plateau that&rsquo;s approximately £200,000 &mdash; far less than buying out 10% at £400,000.</div></div></li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Honest pros and cons</div>
+      <div class="pros-cons">
+        <div class="pros-box">
+          <h3>WHAT WORKS</h3>
+          <ul class="pc-list">
+            <li>DGC recovers 5% of the company once the debt has genuinely been repaid. The dilution is directly tied to value received.</li>
+            <li>Daniel still has meaningful upside &mdash; permanent 5% in a £4M+ business is a solid long-term position. He&rsquo;s not cut out, just right-sized.</li>
+            <li>Total cost to DGC over 17 years drops from £1.89M (original) to approximately £525k &mdash; a saving of over £1.3M in the optimistic scenario.</li>
+            <li>Incentives are aligned in Phase 1: Daniel wants DGC to grow (because his dividends grow) and wants to hit the £150k payback threshold.</li>
+            <li>Structurally clean &mdash; one extra clause in the SHA. Not a fundamentally different deal.</li>
+          </ul>
+        </div>
+        <div class="cons-box">
+          <h3>WHAT TO WATCH</h3>
+          <ul class="pc-list">
+            <li>Year 5 cash hit: DGC must find £115,000 in a single year (£40k dividend + £75k buyback). Plan for this. If cashflow is tight in Year 5, this could be a problem.</li>
+            <li>Daniel may resist. If he&rsquo;s expecting permanent 10%, the ratchet feels like a clawback. Present it as &ldquo;built-in flexibility&rdquo; from the start &mdash; not something introduced after he&rsquo;s agreed to 10%.</li>
+            <li>5% stays forever &mdash; Daniel is still permanently on the cap table. Any future sale still requires his participation.</li>
+            <li>More complex SHA to draft &mdash; the ratchet trigger clause needs precise legal language. Estimated extra solicitor cost: £500&ndash;£800.</li>
+            <li>At Year 5, Daniel&rsquo;s exit total dips slightly (£390k to £385k) because the buyback doesn&rsquo;t fully compensate for the stake drop. A subtle negative worth knowing.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Board review &mdash; six experts, six verdicts</div>
+      <div class="card-sub">Applied to the ratchet structure specifically.</div>
+      <div class="board-grid">
+        <div class="board-card">
+          <div class="board-book">ANGEL INVESTING</div>
+          <div class="board-name">David S. Rose</div>
+          <span class="board-verdict verdict-ok">Better balance</span>
+          <p class="board-text">The ratchet brings Daniel&rsquo;s effective return to roughly 3.5&times;&ndash;4&times; &mdash; far closer to the risk-adjusted return a passive investor in a profitable UK SME should expect. The residual 5% is fair compensation for the early-stage risk taken. Rose: <em>&ldquo;This is a more honest deal. Daniel gets upside proportional to his actual risk, not startup-level returns on a proven business.&rdquo;</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">THE FOUNDER'S DILEMMAS</div>
+          <div class="board-name">Noam Wasserman</div>
+          <span class="board-verdict verdict-ok">Substantially better for DGC</span>
+          <p class="board-text">The ratchet solves the founders&rsquo; timing problem partially. Ash recovers 5% of his company once the capital has paid for itself &mdash; this is Wasserman&rsquo;s textbook alignment mechanism. The residual 5% is justified: Daniel took the early-stage risk. Verdict: <em>&ldquo;This is the correct deal structure for a founder who wants both access to capital and long-term control.&rdquo;</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">DEALMAKING</div>
+          <div class="board-name">Guhan Subramanian</div>
+          <span class="board-verdict verdict-warn">Present it carefully &mdash; framing matters</span>
+          <p class="board-text">Warning: if Daniel already expects straight 10%, introducing the ratchet now means moving away from the anchor. Subramanian: <em>any deviation feels like a loss, even if it&rsquo;s objectively fairer.</em> If possible, lead with this structure. If introducing it now, frame it as &ldquo;built-in flexibility&rdquo; &mdash; never as &ldquo;reduced equity.&rdquo; The ratchet is a setup move; the story around it matters as much as the clause itself.</p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">NEVER SPLIT THE DIFFERENCE</div>
+          <div class="board-name">Chris Voss</div>
+          <span class="board-verdict verdict-warn">Watch for loss aversion</span>
+          <p class="board-text">If Daniel has mentally priced in permanent 10%, the ratchet creates a felt &ldquo;loss&rdquo; &mdash; and people fight harder to avoid a loss than to achieve an equal gain (Kahneman). Voss&rsquo;s move: label it first. <em>&ldquo;I imagine the idea of your stake changing as DGC grows might feel different from what we discussed.&rdquo;</em> Then be quiet. Then: <em>&ldquo;What I can tell you is that the 5% you hold from Year 6 is in a stronger, bigger business.&rdquo;</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">GETTING TO YES</div>
+          <div class="board-name">Roger Fisher &amp; William Ury</div>
+          <span class="board-verdict verdict-ok">Objective criteria are strong</span>
+          <p class="board-text">The ratchet trigger is based on independently verifiable criteria (audited accounts, declared dividends). This is exactly what principled negotiation requires &mdash; no room for subjective interpretation. Fisher&rsquo;s one flag: <em>define &ldquo;cumulative distributions&rdquo; precisely in the SHA. Does it mean declared, paid, or both? Ambiguity here is the source of every future dispute.</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">VENTURE DEALS</div>
+          <div class="board-name">Brad Feld &amp; Jason Mendelson</div>
+          <span class="board-verdict verdict-warn">Unusual but workable &mdash; draft carefully</span>
+          <p class="board-text">Ratchets appear in VC deals (typically anti-dilution or performance mechanisms). For a family deal this adds complexity. Feld&rsquo;s concern: <em>&ldquo;The ratchet trigger must be airtight. What exactly triggers it, when exactly must DGC act, and what happens if DGC delays the buyback payment?&rdquo;</em> Add a 90-day payment window and a penalty clause if DGC misses it. Extra solicitor cost worthwhile.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-ratch -->
+
+  <!-- ============================================================ LOAN -->
+  <div id="tab-loan" class="tab-panel">
+
+    <div class="intro-box">
+      <span class="intro-badge badge-loan">Option B &mdash; Profit-share loan</span>
+      <h2>£150,000 as a loan &mdash; Daniel gets 15% of annual profits until he&rsquo;s received £300,000</h2>
+      <p>This deal has <strong>no shares and no equity</strong>. Daniel lends DGC £150,000. In return, each year when DGC distributes profit to Ash and Harry, Daniel receives 15% of that distribution. This continues until Daniel has received a total of £300,000 &mdash; exactly 2&times; his original investment. Once he hits that £300k figure, the agreement ends completely. No further payments, ever. DGC owns 100% of itself from that point forward.</p>
+      <p>Daniel is not on the cap table. He has no shares to sell. He does not participate in a future sale of DGC beyond what he&rsquo;s already received. He has a contract that pays him well and then ends cleanly.</p>
+      <p>At current projections, Daniel receives his £300,000 around <strong>Year 7</strong>. His annualised return is approximately 10% per year &mdash; better than almost any savings product, lower than the equity deal&rsquo;s theoretical upside, but with a clear, guaranteed finish line.</p>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Daniel lends</div><div class="metric-val">£150k</div><div class="metric-sub">loan &middot; no shares issued</div></div>
+      <div class="metric"><div class="metric-label">Daniel&rsquo;s guaranteed cap</div><div class="metric-val">£300k</div><div class="metric-sub">2&times; money &middot; then done</div></div>
+      <div class="metric"><div class="metric-label">Deal ends</div><div class="metric-val">Year 7</div><div class="metric-sub">cap hit &middot; agreement terminates</div></div>
+      <div class="metric"><div class="metric-label">DGC equity given away</div><div class="metric-val">0%</div><div class="metric-sub">Ash &amp; Harry keep 100%</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Daniel&rsquo;s annual payments vs the cap &mdash; 18 years</div>
+      <div class="legend">
+        <span><span class="ls" style="background:#5DCAA5"></span>Daniel&rsquo;s annual payment (15% of distribution)</span>
+        <span><span class="ll" style="border-top:2.5px solid #0F6E56"></span>Daniel&rsquo;s cumulative total</span>
+        <span><span class="ll" style="border-top:2px dashed #EF9F27"></span>£300k cap (deal ends)</span>
+        <span><span class="ll" style="border-top:2px dashed #ccc"></span>£150k investment</span>
+      </div>
+      <div class="chart-wrap"><canvas id="c3" role="img" aria-label="Profit-share loan projection showing payments stopping at Year 7 cap"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Year by year breakdown</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Year</th><th>FY</th><th>Turnover</th><th>Profit</th><th>Total take out</th><th>Daniel 15%</th><th>Daniel total</th><th>Ash &amp; Harry keep</th><th>Status</th></tr></thead>
+          <tbody id="t3"></tbody>
+        </table>
+      </div>
+      <div class="table-note"><strong>Total take out</strong> = 50% of profit paid out that year. &middot; <strong>Daniel 15%</strong> = his share until the cap is hit. &middot; <strong>Ash &amp; Harry keep</strong> = total take out minus Daniel&rsquo;s cut. &middot; <strong>After Year 7</strong>: Daniel receives nothing. Ash and Harry keep 100% of all distributions forever. &middot; 0% Isle of Man corporate tax throughout.</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">How this deal works &mdash; step by step</div>
+      <ol class="steps">
+        <li><div class="step-body"><div class="step-title">Daniel writes a cheque for £150,000 &mdash; as a loan</div><div class="step-text">The money goes into DGC exactly as before. The key difference: no shares are issued. Daniel has a loan agreement and a profit-share contract. He does not appear on the company&rsquo;s shareholder register.</div></div></li>
+        <li><div class="step-body"><div class="step-title">A simple profit-share agreement is signed</div><div class="step-text">An Isle of Man solicitor drafts a straightforward agreement (approx. £500&ndash;£800 &mdash; far simpler than a full SHA). It says: &ldquo;DGC Ltd will pay Daniel Aziz 15% of all distributable profit distributions until cumulative payments reach £300,000, at which point this agreement terminates.&rdquo;</div></div></li>
+        <li><div class="step-body"><div class="step-title">Each year, Daniel receives 15% of whatever Ash and Harry pay themselves</div><div class="step-text">If Ash and Harry decide to take out £200,000 in Year 1, Daniel automatically gets £30,000 of that. If they take out £250,000 in Year 2, Daniel gets £37,500. His payment is directly proportional to DGC&rsquo;s performance &mdash; better year, more for everyone including Daniel.</div></div></li>
+        <li><div class="step-body"><div class="step-title">Year 7 &mdash; Daniel hits £300,000 and the agreement ends</div><div class="step-text">Around Year 7, Daniel&rsquo;s cumulative payments reach £300,000 &mdash; exactly 2&times; his £150,000 investment. The agreement automatically terminates. DGC makes no further payments, ever. Daniel has no further claim on the business.</div></div></li>
+        <li><div class="step-body"><div class="step-title">From Year 8 onwards &mdash; DGC keeps 100% of everything</div><div class="step-text">Ash and Harry take the full distribution. If DGC is at £10M turnover paying out £500,000 per year, every penny of that goes to Ash and Harry in their 50/50 split. Daniel is done. His agreement is over. He holds no claim on any future profits or any future sale of DGC.</div></div></li>
+        <li><div class="step-body"><div class="step-title">Daniel&rsquo;s return: £300,000 on £150,000 over 7 years</div><div class="step-text">That is 2&times; his money, or approximately 10.4% annualised over 7 years. To put that in context: the FTSE 100 averages 7&ndash;8% per year with full market risk. Daniel is getting above-market returns on a family investment with no share price volatility and no risk of his capital going to zero.</div></div></li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Honest pros and cons</div>
+      <div class="pros-cons">
+        <div class="pros-box">
+          <h3>WHAT WORKS</h3>
+          <ul class="pc-list">
+            <li>DGC gives away zero equity. Ash and Harry remain 50/50 owners forever. No permanent dilution, no cap table complication, no stranger in the room on a future sale.</li>
+            <li>Total cost to DGC is fixed at £300,000. No matter how successful DGC becomes, Daniel never receives more than that. The equity deal could cost DGC £1.89M+ over 17 years &mdash; this is £1.59M cheaper in the optimistic scenario.</li>
+            <li>Natural endpoint at Year 7. The relationship with Daniel as an &ldquo;investor&rdquo; has a clean close. No ongoing obligation, no annual conversations about dividends.</li>
+            <li>Simple agreement &mdash; half the legal cost of a full SHA. No valuation needed. No accountant certificate. Quicker to execute.</li>
+            <li>Daniel&rsquo;s 10.4% annualised return is genuinely competitive. This is not a bad deal for him.</li>
+          </ul>
+        </div>
+        <div class="cons-box">
+          <h3>WHAT TO WATCH</h3>
+          <ul class="pc-list">
+            <li>Daniel has no shares to sell. If DGC grows to £10M and is worth £4M, Daniel has already exited at £300k and sees none of that upside. He may feel this is unfair in retrospect if DGC does extremely well.</li>
+            <li>No equity means Daniel has no &ldquo;stake in the story.&rdquo; If his motivation is partly about being part of what Ash is building &mdash; not just the return &mdash; this deal doesn&rsquo;t give him that. Must test his real motivation before proposing.</li>
+            <li>If DGC grows faster than projected, Daniel hits his £300k cap sooner (Year 5&ndash;6 instead of Year 7) and earns a lower annualised return. Fast growth is better for DGC but reduces Daniel&rsquo;s effective return.</li>
+            <li>If DGC grows slower, Daniel waits longer for his £300k. He has no shares to sell in the meantime. His capital is tied up for potentially 8&ndash;10 years with no liquidity.</li>
+            <li>If presented after Daniel has already been shown the equity deal, he will feel this is a step back. This deal works best when presented first, before any equity expectations are set.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Board review &mdash; six experts, six verdicts</div>
+      <div class="card-sub">Applied to the profit-share loan structure specifically.</div>
+      <div class="board-grid">
+        <div class="board-card">
+          <div class="board-book">ANGEL INVESTING</div>
+          <div class="board-name">David S. Rose</div>
+          <span class="board-verdict verdict-neutral">Not an angel deal &mdash; right for family capital</span>
+          <p class="board-text">Angels want equity &mdash; a portfolio asset they can sell and a chance at 10&times;. This provides neither. But Daniel is not a portfolio investor. For family capital where trust exists and the primary goal is a meaningful return, 2&times; over 7 years (10.4% annualised) is genuinely competitive. Rose: <em>&ldquo;Know your investor. If Daniel wants upside in DGC&rsquo;s story, this fails. If he wants a solid return and a clean exit, this is better than equity.&rdquo;</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">THE FOUNDER'S DILEMMAS</div>
+          <div class="board-name">Noam Wasserman</div>
+          <span class="board-verdict verdict-ok">The optimal founders&rsquo; choice</span>
+          <p class="board-text">This is Wasserman&rsquo;s textbook answer to the wealth-vs-control dilemma. Ash keeps 100% of future equity upside &mdash; the most valuable 100% he&rsquo;ll ever own, as DGC scales from £3M to £10M. The fixed £300k cost vs the equity deal&rsquo;s £1.89M+ represents a £1.59M saving in long-term wealth that stays with Ash and Harry. <em>&ldquo;Founders who preserve equity at the growth stage finish significantly wealthier at exit.&rdquo;</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">DEALMAKING</div>
+          <div class="board-name">Guhan Subramanian</div>
+          <span class="board-verdict verdict-warn">Only works if presented first</span>
+          <p class="board-text">If Daniel already expects an equity deal, switching to this requires a full reframe. Subramanian: <em>you cannot move away from an anchor without a compelling narrative shift.</em> If this is the preferred structure, it must be presented before Daniel forms an equity expectation. The opening frame: <em>&ldquo;I want to give you a guaranteed 2&times; return with a clean exit.&rdquo;</em> That is an entirely different conversation from an equity pitch.</p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">NEVER SPLIT THE DIFFERENCE</div>
+          <div class="board-name">Chris Voss</div>
+          <span class="board-verdict verdict-ok">Lead with the win, not the structure</span>
+          <p class="board-text">Never open with &ldquo;it&rsquo;s a loan, not shares.&rdquo; That framing triggers resistance before Daniel has heard anything. Voss&rsquo;s approach: <em>&ldquo;What if I could guarantee you £300,000 &mdash; twice your money &mdash; with a clear finish line and nothing tied up in shares you can&rsquo;t sell?&rdquo;</em> That is the hook. The profit-share structure is the detail that follows. Use the calibrated question: <em>&ldquo;How does that compare to other things you could do with this money?&rdquo;</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">GETTING TO YES</div>
+          <div class="board-name">Roger Fisher &amp; William Ury</div>
+          <span class="board-verdict verdict-warn">Best on interests &mdash; test the relationship goal first</span>
+          <p class="board-text">This deal perfectly aligns both parties&rsquo; financial interests: DGC keeps equity, Daniel gets a solid return. The objective criteria (15%, £300k cap, audited accounts) are airtight. Fisher&rsquo;s one caution: <em>if Daniel&rsquo;s underlying interest is participation in DGC&rsquo;s journey &mdash; not just the return &mdash; this deal doesn&rsquo;t serve that interest at all.</em> Ask before proposing: <em>&ldquo;Is this about the return, or about being part of what we&rsquo;re building?&rdquo;</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">VENTURE DEALS</div>
+          <div class="board-name">Brad Feld &amp; Jason Mendelson</div>
+          <span class="board-verdict verdict-ok">Right tool for the job</span>
+          <p class="board-text">Feld: <em>&ldquo;Stop trying to make a family funding round look like a Series A.&rdquo;</em> For a £3M construction company raising £150k from a family member, a profit-share loan is appropriate, efficient, and clean. No equity cap table, no SHA, no anti-dilution provisions, no board dynamics to manage. Solicitor cost drops from ~£2,000 to ~£500. Simple agreement, clear terms, natural endpoint. <em>&ldquo;This is the professional choice.&rdquo;</em></p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-loan -->
+
+  <div class="footer">
+    DGC Ltd &middot; Isle of Man &middot; June 2026 &middot; Private &amp; confidential<br>
+    Figures are projections based on 10% profit margin (optimistic case), 50% profit distribution, 4&times; profit valuation, 0% IoM corporate tax.<br>
+    Not financial advice. All deals subject to solicitor review and accountant sign-off before any money moves.
+  </div>
+</div>
+
+<script>
+var LABELS=['Now','Y1','Y2','Y3','Y4','Y5','Y6','Y7','Y8','Y9','Y10','Y11','Y12','Y13','Y14','Y15','Y16','Y17'];
+var charts={};
+
+function unlock(){
+  if(document.getElementById('pwd').value==='0412'){
+    document.getElementById('gate').style.display='none';
+    document.getElementById('main').style.display='block';
+    initChart('orig');
+  }else{
+    document.getElementById('err').style.display='block';
+    document.getElementById('pwd').value='';
+    document.getElementById('pwd').focus();
+  }
+}
+
+function showTab(id){
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('tab-'+id).classList.add('active');
+  var btns=document.querySelectorAll('.tab-btn');
+  var map={orig:0,ratch:1,loan:2};
+  btns[map[id]].classList.add('active');
+  if(!charts[id]) initChart(id);
+}
+
+function initChart(id){
+  if(id==='orig') buildChart1();
+  else if(id==='ratch') buildChart2();
+  else if(id==='loan') buildChart3();
+}
+
+/* ---- DEAL 1: Original */
+var D1={
+  annDiv:[0,20,25,30,35,40,45,50,50,50,50,50,50,50,50,50,50,50],
+  cumDiv:[0,20,45,75,110,150,195,245,295,345,395,445,495,545,595,645,695,745],
+  stake: [120,160,200,240,280,320,360,400,400,400,400,400,400,400,400,400,400,400],
+  exit:  [120,180,245,315,390,470,555,645,695,745,795,845,895,945,995,1045,1095,1145]
+};
+function buildChart1(){
+  var ctx=document.getElementById('c1').getContext('2d');
+  var bg=D1.annDiv.map(function(_,i){return i===0?'rgba(0,0,0,0)':i<=7?'#85B7EB':'#9FE1CB';});
+  charts['orig']=new Chart(ctx,{type:'bar',data:{labels:LABELS,datasets:[
+    {label:'Annual take out',type:'bar',data:D1.annDiv,backgroundColor:bg,borderRadius:3,order:5},
+    {label:'Cumulative total',type:'line',data:D1.cumDiv,borderColor:'#22a06b',backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#22a06b',tension:0.3,order:1},
+    {label:'Share value at 10%',type:'line',data:D1.stake,borderColor:'#EF9F27',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],pointRadius:3,pointBackgroundColor:'#EF9F27',tension:0.2,order:2},
+    {label:'Total exit value',type:'line',data:D1.exit,borderColor:'#7F77DD',backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#7F77DD',tension:0.3,order:3},
+    {label:'Investment',type:'line',data:LABELS.map(function(){return 150;}),borderColor:'#ccc',backgroundColor:'transparent',borderWidth:1,borderDash:[4,4],pointRadius:0,order:4}
+  ]},options:chartOpts()});
+  buildTable1();
+}
+function buildTable1(){
+  var rows=[
+    {yr:'Now',fy:'2026',to:'£3.0M',cv:'£1.2M',eb:'£300k',dist:'—',ann:'—',cum:'—',stake:'£120k',exit:'£120k',cl:'grace'},
+    {yr:'Y1',fy:'2027',to:'£4.0M',cv:'£1.6M',eb:'£400k',dist:'£200k',ann:'£20k',cum:'£20k',stake:'£160k',exit:'£180k',cl:''},
+    {yr:'Y2',fy:'2028',to:'£5.0M',cv:'£2.0M',eb:'£500k',dist:'£250k',ann:'£25k',cum:'£45k',stake:'£200k',exit:'£245k',cl:''},
+    {yr:'Y3',fy:'2029',to:'£6.0M',cv:'£2.4M',eb:'£600k',dist:'£300k',ann:'£30k',cum:'£75k',stake:'£240k',exit:'£315k',cl:''},
+    {yr:'Y4',fy:'2030',to:'£7.0M',cv:'£2.8M',eb:'£700k',dist:'£350k',ann:'£35k',cum:'£110k',stake:'£280k',exit:'£390k',cl:''},
+    {yr:'Y5',fy:'2031',to:'£8.0M',cv:'£3.2M',eb:'£800k',dist:'£400k',ann:'£40k',cum:'£150k ✓',stake:'£320k',exit:'£470k',cl:'payback'},
+    {yr:'Y6',fy:'2032',to:'£9.0M',cv:'£3.6M',eb:'£900k',dist:'£450k',ann:'£45k',cum:'£195k',stake:'£360k',exit:'£555k',cl:''},
+    {yr:'Y7',fy:'2033',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£245k',stake:'£400k',exit:'£645k',cl:''},
+    {sep:true,label:'— £10M/yr held flat · £50k/yr to Daniel every year from here —'},
+    {yr:'Y8',fy:'2034',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£295k',stake:'£400k',exit:'£695k',cl:'plateau'},
+    {yr:'Y10',fy:'2036',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£395k',stake:'£400k',exit:'£795k',cl:'plateau'},
+    {yr:'Y12',fy:'2038',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£495k',stake:'£400k',exit:'£895k',cl:'plateau'},
+    {yr:'Y15',fy:'2041',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£645k',stake:'£400k',exit:'£1.045M',cl:'plateau'},
+    {yr:'Y17',fy:'2043',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£50k',cum:'£745k',stake:'£400k',exit:'£1.145M',cl:'plateau'}
+  ];
+  var h='';
+  rows.forEach(function(r){
+    if(r.sep){h+='<tr class="sep"><td colspan="10">'+r.label+'</td></tr>';return;}
+    h+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.cv+'</td><td>'+r.eb+'</td><td>'+r.dist+'</td><td>'+r.ann+'</td><td>'+r.cum+'</td><td>'+r.stake+'</td><td>'+r.exit+'</td></tr>';
+  });
+  document.getElementById('t1').innerHTML=h;
+}
+
+/* ---- DEAL 2: Ratchet */
+var D2={
+  annDiv:[0,20,25,30,35,40,23,25,25,25,25,25,25,25,25,25,25,25],
+  annBuy:[0,0,0,0,0,75,0,0,0,0,0,0,0,0,0,0,0,0],
+  cumCash:[0,20,45,75,110,225,248,273,298,323,348,373,398,423,448,473,498,523],
+  stake:  [120,160,200,240,280,160,180,200,200,200,200,200,200,200,200,200,200,200],
+  exit:   [120,180,245,315,390,385,428,473,498,523,548,573,598,623,648,673,698,723]
+};
+function buildChart2(){
+  var ctx=document.getElementById('c2').getContext('2d');
+  var bg1=D2.annDiv.map(function(_,i){return i<=5?'#85B7EB':'#9FE1CB';});
+  charts['ratch']=new Chart(ctx,{type:'bar',data:{labels:LABELS,datasets:[
+    {label:'Annual dividend',type:'bar',data:D2.annDiv,backgroundColor:bg1,borderRadius:3,order:5,stack:'s'},
+    {label:'Year 5 buyback (£75k)',type:'bar',data:D2.annBuy,backgroundColor:'#EF9F27',borderRadius:3,order:5,stack:'s'},
+    {label:'Total cash to Daniel',type:'line',data:D2.cumCash,borderColor:'#22a06b',backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#22a06b',tension:0.3,order:1},
+    {label:'Stake value (10% then 5%)',type:'line',data:D2.stake,borderColor:'#7F77DD',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],pointRadius:3,pointBackgroundColor:'#7F77DD',tension:0.2,order:2},
+    {label:'Investment',type:'line',data:LABELS.map(function(){return 150;}),borderColor:'#ccc',backgroundColor:'transparent',borderWidth:1,borderDash:[4,4],pointRadius:0,order:4}
+  ]},options:chartOpts()});
+  buildTable2();
+}
+function buildTable2(){
+  var rows=[
+    {yr:'Now',fy:'2026',to:'£3.0M',cv:'£1.2M',eb:'£300k',dist:'—',ann:'— (10%)',cum:'—',stake:'£120k',exit:'£120k',cl:'grace'},
+    {yr:'Y1',fy:'2027',to:'£4.0M',cv:'£1.6M',eb:'£400k',dist:'£200k',ann:'£20k (10%)',cum:'£20k',stake:'£160k',exit:'£180k',cl:''},
+    {yr:'Y2',fy:'2028',to:'£5.0M',cv:'£2.0M',eb:'£500k',dist:'£250k',ann:'£25k (10%)',cum:'£45k',stake:'£200k',exit:'£245k',cl:''},
+    {yr:'Y3',fy:'2029',to:'£6.0M',cv:'£2.4M',eb:'£600k',dist:'£300k',ann:'£30k (10%)',cum:'£75k',stake:'£240k',exit:'£315k',cl:''},
+    {yr:'Y4',fy:'2030',to:'£7.0M',cv:'£2.8M',eb:'£700k',dist:'£350k',ann:'£35k (10%)',cum:'£110k',stake:'£280k',exit:'£390k',cl:''},
+    {yr:'Y5',fy:'2031',to:'£8.0M',cv:'£3.2M',eb:'£800k',dist:'£400k',ann:'£40k div + £75k buyback',cum:'£225k total cash',stake:'£160k (now 5%)',exit:'£385k',cl:'payback'},
+    {sep:true,label:'★ RATCHET TRIGGERED · Daniel drops 10% → 5% · DGC paid £75k to buy back 5% ★'},
+    {yr:'Y6',fy:'2032',to:'£9.0M',cv:'£3.6M',eb:'£900k',dist:'£450k',ann:'£23k (5%)',cum:'£248k',stake:'£180k (5%)',exit:'£428k',cl:''},
+    {yr:'Y7',fy:'2033',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£25k (5%)',cum:'£273k',stake:'£200k (5%)',exit:'£473k',cl:''},
+    {sep:true,label:'— £10M/yr held flat · £25k/yr to Daniel at 5% · £200k stake value held flat —'},
+    {yr:'Y10',fy:'2036',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£25k (5%)',cum:'£348k',stake:'£200k (5%)',exit:'£548k',cl:'plateau'},
+    {yr:'Y15',fy:'2041',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£25k (5%)',cum:'£473k',stake:'£200k (5%)',exit:'£673k',cl:'plateau'},
+    {yr:'Y17',fy:'2043',to:'£10.0M',cv:'£4.0M',eb:'£1.0M',dist:'£500k',ann:'£25k (5%)',cum:'£523k',stake:'£200k (5%)',exit:'£723k',cl:'plateau'}
+  ];
+  var h='';
+  rows.forEach(function(r){
+    if(r.sep){
+      var isr=r.label.indexOf('RATCHET')>=0;
+      h+='<tr class="'+(isr?'ratchet-row':'sep')+'"><td colspan="10">'+r.label+'</td></tr>';
+      return;
+    }
+    h+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.cv+'</td><td>'+r.eb+'</td><td>'+r.dist+'</td><td>'+r.ann+'</td><td>'+r.cum+'</td><td>'+r.stake+'</td><td>'+r.exit+'</td></tr>';
+  });
+  document.getElementById('t2').innerHTML=h;
+}
+
+/* ---- DEAL 3: Profit-share loan */
+var D3={
+  danAnn: [0,30,38,45,53,60,68,6,0,0,0,0,0,0,0,0,0,0],
+  danCum: [0,30,68,113,166,226,294,300,300,300,300,300,300,300,300,300,300,300]
+};
+function buildChart3(){
+  var ctx=document.getElementById('c3').getContext('2d');
+  var bg=D3.danAnn.map(function(v){return v>0?'#5DCAA5':'rgba(0,0,0,0)';});
+  charts['loan']=new Chart(ctx,{type:'bar',data:{labels:LABELS,datasets:[
+    {label:"Daniel's annual payment",type:'bar',data:D3.danAnn,backgroundColor:bg,borderRadius:3,order:5},
+    {label:"Daniel's cumulative total",type:'line',data:D3.danCum,borderColor:'#0F6E56',backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#0F6E56',tension:0.3,order:1},
+    {label:'£300k cap',type:'line',data:LABELS.map(function(){return 300;}),borderColor:'#EF9F27',backgroundColor:'transparent',borderWidth:1.5,borderDash:[5,4],pointRadius:0,order:2},
+    {label:'£150k investment',type:'line',data:LABELS.map(function(){return 150;}),borderColor:'#ccc',backgroundColor:'transparent',borderWidth:1,borderDash:[4,4],pointRadius:0,order:3}
+  ]},options:chartOpts()});
+  buildTable3();
+}
+function buildTable3(){
+  var rows=[
+    {yr:'Now',fy:'2026',to:'£3.0M',eb:'£300k',dist:'—',dan:'—',cum:'—',ah:'—',st:'Grace period',cl:'grace'},
+    {yr:'Y1',fy:'2027',to:'£4.0M',eb:'£400k',dist:'£200k',dan:'£30k',cum:'£30k',ah:'£170k',st:'',cl:''},
+    {yr:'Y2',fy:'2028',to:'£5.0M',eb:'£500k',dist:'£250k',dan:'£38k',cum:'£68k',ah:'£212k',st:'',cl:''},
+    {yr:'Y3',fy:'2029',to:'£6.0M',eb:'£600k',dist:'£300k',dan:'£45k',cum:'£113k',ah:'£255k',st:'',cl:''},
+    {yr:'Y4',fy:'2030',to:'£7.0M',eb:'£700k',dist:'£350k',dan:'£53k',cum:'£166k',ah:'£297k',st:'',cl:''},
+    {yr:'Y5',fy:'2031',to:'£8.0M',eb:'£800k',dist:'£400k',dan:'£60k',cum:'£226k',ah:'£340k',st:'',cl:''},
+    {yr:'Y6',fy:'2032',to:'£9.0M',eb:'£900k',dist:'£450k',dan:'£68k',cum:'£294k',ah:'£382k',st:'Near cap',cl:''},
+    {yr:'Y7',fy:'2033',to:'£10.0M',eb:'£1.0M',dist:'£500k',dan:'£6k',cum:'£300k ✓',ah:'£494k',st:'CAP HIT',cl:'cap-hit'},
+    {sep:true,label:'★ DEAL ENDS · Daniel has received £300k · Agreement terminated · DGC owes nothing further ★'},
+    {yr:'Y8',fy:'2034',to:'£10.0M',eb:'£1.0M',dist:'£500k',dan:'£0',cum:'£300k',ah:'£500k',st:'Done',cl:'ended-row'},
+    {yr:'Y10',fy:'2036',to:'£10.0M',eb:'£1.0M',dist:'£500k',dan:'£0',cum:'£300k',ah:'£500k',st:'Done',cl:'ended-row'},
+    {yr:'Y17',fy:'2043',to:'£10.0M',eb:'£1.0M',dist:'£500k',dan:'£0',cum:'£300k',ah:'£500k',st:'Done',cl:'ended-row'}
+  ];
+  var h='';
+  rows.forEach(function(r){
+    if(r.sep){h+='<tr class="ratchet-row" style="background:#e1f5ee;color:#0f6e56"><td colspan="9">'+r.label+'</td></tr>';return;}
+    h+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.eb+'</td><td>'+r.dist+'</td><td>'+r.dan+'</td><td>'+r.cum+'</td><td>'+r.ah+'</td><td>'+r.st+'</td></tr>';
+  });
+  document.getElementById('t3').innerHTML=h;
+}
+
+function chartOpts(){
+  return{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:function(c){return ' '+c.dataset.label+': £'+Math.round(c.parsed.y)+'k';}}}
+    },
+    scales:{
+      y:{beginAtZero:true,ticks:{callback:function(v){return '£'+Math.round(v)+'k';},color:'#888780',font:{size:10}},grid:{color:'rgba(136,135,128,0.08)'}},
+      x:{ticks:{color:'#888780',font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}}
+    }
+  };
+}
+</script>
+</body>
+</html>
