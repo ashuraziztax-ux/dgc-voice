@@ -108,7 +108,7 @@ tr.plateau td{color:#888780}
       <table>
         <thead>
           <tr>
-            <th>Year</th><th>FY</th><th>Turnover</th><th>Co. value</th><th>Profit</th><th>Take out</th><th>Ash &amp; Harry total</th><th>Daniel &pound;/yr</th><th>Daniel total</th><th>Stake / buyback</th><th>Exit total</th>
+            <th>Year</th><th>FY</th><th>Turnover</th><th>Co. value</th><th>Profit</th><th>Take out</th><th>Daniel &pound;/yr</th><th>Daniel total</th><th>Stake / buyback</th><th>Exit total</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -302,10 +302,10 @@ function renderTable(d){
   var idx=0;
   d.rows.forEach(function(r){
     if(r.sep){
-      html+='<tr class="sep"><td colspan="11">'+d.sepLabel+'</td></tr>';
+      html+='<tr class="sep"><td colspan="10">'+d.sepLabel+'</td></tr>';
       return;
     }
-    html+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.cv+'</td><td>'+r.eb+'</td><td>'+r.dist+'</td><td>'+d.ahCum[idx]+'</td><td>'+r.ann+'</td><td>'+r.cum+'</td><td>'+r.stake+'</td><td>'+r.exit+'</td></tr>';
+    html+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.cv+'</td><td>'+r.eb+'</td><td>'+r.dist+'</td><td>'+r.ann+'</td><td>'+r.cum+'</td><td>'+r.stake+'</td><td>'+r.exit+'</td></tr>';
     idx++;
   });
   document.getElementById('tableBody').innerHTML=html;
