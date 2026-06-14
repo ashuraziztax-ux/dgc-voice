@@ -95,7 +95,7 @@ tr.plateau td{color:#888780}
       <span><span class="ls" style="background:#85B7EB"></span>Annual dividend &mdash; growth phase</span>
       <span><span class="ls" style="background:#9FE1CB"></span>Annual dividend &mdash; plateau</span>
       <span><span class="ll" style="border-top:2.5px solid #22a06b"></span>Cumulative dividends</span>
-      <span><span class="ll" style="border-top:2px dashed #EF9F27"></span>Stake / buyback value</span>
+      <span><span class="ll" style="border-top:2px dashed #EF9F27"></span>Share value at 10% value</span>
       <span><span class="ll" style="border-top:2.5px solid #7F77DD"></span>Total exit value</span>
       <span><span class="ll" style="border-top:2px dashed #ccc"></span>Investment</span>
     </div>
@@ -108,7 +108,7 @@ tr.plateau td{color:#888780}
       <table>
         <thead>
           <tr>
-            <th>Year</th><th>FY</th><th>Turnover</th><th>Co. value</th><th>Profit</th><th>Take out</th><th>Daniel &pound;/yr</th><th>Daniel total</th><th>Stake / buyback</th><th>Exit total</th>
+            <th>Year</th><th>FY</th><th>Turnover</th><th>Co. value</th><th>Profit</th><th>Take out</th><th>Daniel &pound;/yr</th><th>Daniel total</th><th>Share value at 10%</th><th>Exit total</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -117,7 +117,7 @@ tr.plateau td{color:#888780}
     <div class="table-note">
       <strong>Profit</strong> = what the business earns after running costs, before paying owners. &middot;
       <strong>Take out</strong> = 50% of profit paid out to shareholders each year (the other 50% stays in the business). &middot;
-      <strong>Stake / buyback</strong> = what Daniel&rsquo;s shares are worth if DGC bought him out (4&times; profit &times; his %). &middot;
+      <strong>Share value at 10%</strong> = what Daniel&rsquo;s shares are worth if DGC bought him out (4&times; profit &times; his %). &middot;
       <strong>Exit total</strong> = all dividends received to date + current stake value. &middot;
       Green row = full investment paid back through dividends alone. &middot;
       0% Isle of Man corporate tax throughout.
@@ -278,7 +278,7 @@ function renderChart(d){
       datasets:[
         {label:'Annual dividend',type:'bar',data:d.annDiv,backgroundColor:bg,borderRadius:3,order:5},
         {label:'Cumulative dividends',type:'line',data:d.cumDiv,borderColor:'#22a06b',backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#22a06b',tension:0.3,order:1},
-        {label:'Stake / buyback',type:'line',data:d.stake,borderColor:'#EF9F27',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],pointRadius:3,pointBackgroundColor:'#EF9F27',pointStyle:'rectRot',tension:0.2,order:2},
+        {label:'Share value at 10%',type:'line',data:d.stake,borderColor:'#EF9F27',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],pointRadius:3,pointBackgroundColor:'#EF9F27',pointStyle:'rectRot',tension:0.2,order:2},
         {label:'Total exit value',type:'line',data:d.exit,borderColor:'#7F77DD',backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#7F77DD',pointStyle:'triangle',tension:0.3,order:3},
         {label:'Investment',type:'line',data:ref,borderColor:'#ccc',backgroundColor:'transparent',borderWidth:1,borderDash:[4,4],pointRadius:0,order:4}
       ]
