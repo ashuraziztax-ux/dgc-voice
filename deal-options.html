@@ -388,15 +388,14 @@ tr.ended-row td{color:#bbb}
       <span class="intro-badge badge-loan">Option C &mdash; Profit-share loan</span>
       <h2>£150,000 as a loan &mdash; Daniel gets 15% of annual profits until he&rsquo;s received £300,000</h2>
       <p>This deal has <strong>no shares and no equity</strong>. Daniel lends DGC £150,000. In return, each year when DGC distributes profit to Ash and Harry, Daniel receives 15% of that distribution. This continues until Daniel has received a total of £300,000 &mdash; exactly 2&times; his original investment. Once he hits that £300k figure, the agreement ends completely. No further payments, ever. DGC owns 100% of itself from that point forward.</p>
-      <p><strong>Grace period: Year 0 and Year 1.</strong> No payments are made in either of the first two years. The money goes into the business and DGC uses it. Daniel&rsquo;s first payment arrives at the Year 2 year-end, once the business has had time to grow with the capital.</p>
       <p>Daniel is not on the cap table. He has no shares to sell. He does not participate in a future sale of DGC beyond what he&rsquo;s already received. He has a contract that pays him well and then ends cleanly.</p>
-      <p>At current projections, Daniel receives his £300,000 around <strong>Year 7</strong>. His annualised return is approximately 9% per year &mdash; better than almost any savings product, lower than the equity deal&rsquo;s theoretical upside, but with a clear, guaranteed finish line.</p>
+      <p>At current projections, Daniel receives his £300,000 around <strong>Year 7</strong>. His annualised return is approximately 10% per year &mdash; better than almost any savings product, lower than the equity deal&rsquo;s theoretical upside, but with a clear, guaranteed finish line.</p>
     </div>
 
     <div class="metrics">
       <div class="metric"><div class="metric-label">Daniel lends</div><div class="metric-val">£150k</div><div class="metric-sub">loan &middot; no shares issued</div></div>
       <div class="metric"><div class="metric-label">Daniel&rsquo;s guaranteed cap</div><div class="metric-val">£300k</div><div class="metric-sub">2&times; money &middot; then done</div></div>
-      <div class="metric"><div class="metric-label">Grace period</div><div class="metric-val">Y0 + Y1</div><div class="metric-sub">nothing paid for 2 years</div></div>
+      <div class="metric"><div class="metric-label">Deal ends</div><div class="metric-val">Year 7</div><div class="metric-sub">cap hit &middot; agreement terminates</div></div>
       <div class="metric"><div class="metric-label">DGC equity given away</div><div class="metric-val">0%</div><div class="metric-sub">Ash &amp; Harry keep 100%</div></div>
     </div>
 
@@ -427,8 +426,7 @@ tr.ended-row td{color:#bbb}
       <ol class="steps">
         <li><div class="step-body"><div class="step-title">Daniel writes a cheque for £150,000 &mdash; as a loan</div><div class="step-text">The money goes into DGC exactly as before. The key difference: no shares are issued. Daniel has a loan agreement and a profit-share contract. He does not appear on the company&rsquo;s shareholder register.</div></div></li>
         <li><div class="step-body"><div class="step-title">A simple profit-share agreement is signed</div><div class="step-text">An Isle of Man solicitor drafts a straightforward agreement (approx. £500&ndash;£800 &mdash; far simpler than a full SHA). It says: &ldquo;DGC Ltd will pay Daniel Aziz 15% of all distributable profit distributions until cumulative payments reach £300,000, at which point this agreement terminates.&rdquo;</div></div></li>
-        <li><div class="step-body"><div class="step-title">Year 0 and Year 1 &mdash; nothing paid, full grace period</div><div class="step-text">The money goes into DGC in Year 0 and works in the business for two full years. No payment is made to Daniel in Year 0 or Year 1. The first payment arrives at the Year 2 year-end, once DGC has had time to grow with the capital.</div></div></li>
-        <li><div class="step-body"><div class="step-title">From Year 2 onwards, Daniel receives 15% of whatever Ash and Harry pay themselves</div><div class="step-text">If Ash and Harry take out £250,000 in Year 2, Daniel gets £37,500. If they take out £300,000 in Year 3, Daniel gets £45,000. His payment is directly tied to DGC&rsquo;s performance &mdash; better year, more for everyone including Daniel.</div></div></li>
+        <li><div class="step-body"><div class="step-title">From Year 1 onwards, Daniel receives 15% of whatever Ash and Harry pay themselves</div><div class="step-text">If Ash and Harry take out £200,000 in Year 1, Daniel gets £30,000. If they take out £250,000 in Year 2, Daniel gets £37,500. His payment is directly tied to DGC&rsquo;s performance &mdash; better year, more for everyone including Daniel.</div></div></li>
         <li><div class="step-body"><div class="step-title">Year 7 &mdash; Daniel hits £300,000 and the agreement ends</div><div class="step-text">Around Year 7, Daniel&rsquo;s cumulative payments reach £300,000 &mdash; exactly 2&times; his £150,000 investment. The agreement automatically terminates. DGC makes no further payments, ever. Daniel has no further claim on the business.</div></div></li>
         <li><div class="step-body"><div class="step-title">From Year 8 onwards &mdash; DGC keeps 100% of everything</div><div class="step-text">Ash and Harry take the full distribution. If DGC is at £10M turnover paying out £500,000 per year, every penny of that goes to Ash and Harry in their 50/50 split. Daniel is done. His agreement is over. He holds no claim on any future profits or any future sale of DGC.</div></div></li>
         <li><div class="step-body"><div class="step-title">Daniel&rsquo;s return: £300,000 on £150,000 over 7 years</div><div class="step-text">That is 2&times; his money, or approximately 10.4% annualised over 7 years. To put that in context: the FTSE 100 averages 7&ndash;8% per year with full market risk. Daniel is getting above-market returns on a family investment with no share price volatility and no risk of his capital going to zero.</div></div></li>
@@ -639,8 +637,8 @@ function buildTable2(){
 
 /* ---- DEAL 3: Profit-share loan */
 var D3={
-  danAnn: [0,0,38,45,53,60,68,36,0,0,0,0,0,0,0,0,0,0],
-  danCum: [0,0,38,83,136,196,264,300,300,300,300,300,300,300,300,300,300,300]
+  danAnn: [0,30,38,45,53,60,68,6,0,0,0,0,0,0,0,0,0,0],
+  danCum: [0,30,68,113,166,226,294,300,300,300,300,300,300,300,300,300,300,300]
 };
 function buildChart3(){
   var ctx=document.getElementById('c3').getContext('2d');
@@ -656,13 +654,13 @@ function buildChart3(){
 function buildTable3(){
   var rows=[
     {yr:'Now',fy:'2026',to:'£3.0M',eb:'£300k',dist:'—',dan:'—',cum:'—',ah:'—',st:'Grace period',cl:'grace'},
-    {yr:'Y1',fy:'2027',to:'£4.0M',eb:'£400k',dist:'£200k',dan:'£0',cum:'£0',ah:'£200k',st:'Grace period',cl:'grace'},
-    {yr:'Y2',fy:'2028',to:'£5.0M',eb:'£500k',dist:'£250k',dan:'£38k',cum:'£38k',ah:'£212k',st:'First payment',cl:''},
-    {yr:'Y3',fy:'2029',to:'£6.0M',eb:'£600k',dist:'£300k',dan:'£45k',cum:'£83k',ah:'£255k',st:'',cl:''},
-    {yr:'Y4',fy:'2030',to:'£7.0M',eb:'£700k',dist:'£350k',dan:'£53k',cum:'£136k',ah:'£297k',st:'',cl:''},
-    {yr:'Y5',fy:'2031',to:'£8.0M',eb:'£800k',dist:'£400k',dan:'£60k',cum:'£196k',ah:'£340k',st:'',cl:''},
-    {yr:'Y6',fy:'2032',to:'£9.0M',eb:'£900k',dist:'£450k',dan:'£68k',cum:'£264k',ah:'£382k',st:'Near cap',cl:''},
-    {yr:'Y7',fy:'2033',to:'£10.0M',eb:'£1.0M',dist:'£500k',dan:'£36k',cum:'£300k ✓',ah:'£464k',st:'CAP HIT',cl:'cap-hit'},
+    {yr:'Y1',fy:'2027',to:'£4.0M',eb:'£400k',dist:'£200k',dan:'£30k',cum:'£30k',ah:'£170k',st:'First payment',cl:''},
+    {yr:'Y2',fy:'2028',to:'£5.0M',eb:'£500k',dist:'£250k',dan:'£38k',cum:'£68k',ah:'£212k',st:'',cl:''},
+    {yr:'Y3',fy:'2029',to:'£6.0M',eb:'£600k',dist:'£300k',dan:'£45k',cum:'£113k',ah:'£255k',st:'',cl:''},
+    {yr:'Y4',fy:'2030',to:'£7.0M',eb:'£700k',dist:'£350k',dan:'£53k',cum:'£166k',ah:'£297k',st:'',cl:''},
+    {yr:'Y5',fy:'2031',to:'£8.0M',eb:'£800k',dist:'£400k',dan:'£60k',cum:'£226k',ah:'£340k',st:'',cl:''},
+    {yr:'Y6',fy:'2032',to:'£9.0M',eb:'£900k',dist:'£450k',dan:'£68k',cum:'£294k',ah:'£382k',st:'Near cap',cl:''},
+    {yr:'Y7',fy:'2033',to:'£10.0M',eb:'£1.0M',dist:'£500k',dan:'£6k',cum:'£300k ✓',ah:'£494k',st:'CAP HIT',cl:'cap-hit'},
     {sep:true,label:'★ DEAL ENDS · Daniel has received £300k · Agreement terminated · DGC owes nothing further ★'},
     {yr:'Y8',fy:'2034',to:'£10.0M',eb:'£1.0M',dist:'£500k',dan:'£0',cum:'£300k',ah:'£500k',st:'Done',cl:'ended-row'},
     {yr:'Y10',fy:'2036',to:'£10.0M',eb:'£1.0M',dist:'£500k',dan:'£0',cum:'£300k',ah:'£500k',st:'Done',cl:'ended-row'},
