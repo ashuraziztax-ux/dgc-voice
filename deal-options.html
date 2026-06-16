@@ -35,6 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .badge-orig{background:#f0f0fa;color:#534AB7}
 .badge-ratch{background:#FAEEDA;color:#854F0B}
 .badge-loan{background:#e1f5ee;color:#0f6e56}
+.badge-fixed{background:#EEEDFE;color:#3C3489}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
 .metric{background:#1a1a18;color:#fff;border-radius:11px;padding:18px 20px}
 .metric-label{font-size:11px;color:#706f6b;margin-bottom:7px;line-height:1.4}
@@ -120,14 +121,15 @@ tr.ended-row td{color:#bbb}
 <div id="main">
   <div class="header">
     <div class="header-eyebrow">Private &amp; confidential &middot; June 2026</div>
-    <div class="header-title">DGC &mdash; Three Deal Options</div>
-    <div class="header-sub">Original proposal plus two structured alternatives &middot; Ash Aziz &middot; DGC Ltd</div>
+    <div class="header-title">DGC &mdash; Four Deal Options</div>
+    <div class="header-sub">Original proposal plus three structured alternatives &middot; Ash Aziz &middot; DGC Ltd</div>
   </div>
 
   <div class="tabs">
     <button class="tab-btn active" onclick="showTab('orig')">Option A &mdash; Original £150k / 10%</button>
     <button class="tab-btn" onclick="showTab('ratch')">Option B &mdash; Ratchet</button>
     <button class="tab-btn" onclick="showTab('loan')">Option C &mdash; Profit-share loan</button>
+    <button class="tab-btn" onclick="showTab('fixed')">Option D &mdash; Fixed-term loan</button>
   </div>
 
   <!-- ============================================================ ORIGINAL -->
@@ -504,6 +506,128 @@ tr.ended-row td{color:#bbb}
 
   </div><!-- /tab-loan -->
 
+  <!-- ============================================================ FIXED LOAN -->
+  <div id="tab-fixed" class="tab-panel">
+
+    <div class="intro-box">
+      <span class="intro-badge badge-fixed">Option D &mdash; Fixed-term loan</span>
+      <h2>£150,000 as a loan &mdash; a year&rsquo;s break, then £100,000 back every year for 3 years</h2>
+      <p>The cleanest deal on the table. Daniel lends DGC £150,000. Year 1 is a full grace period &mdash; no payments while the capital beds into the business. Then, starting Year 2, DGC pays Daniel <strong>£100,000 a year for 3 years</strong>. After the third payment Daniel has received £300,000 &mdash; exactly double his money &mdash; and the agreement ends completely.</p>
+      <p>No shares. No equity. No profit calculations. No ongoing relationship. Three fixed annual payments and done by <strong>2030</strong>.</p>
+      <p>The annualised return is 19% compound &mdash; well above any savings product or index fund, with no market risk. The principal (£150,000) returns tax-free to Daniel; only the profit element (£150,000) is assessable income in Australia, spread across 3 years.</p>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Daniel lends</div><div class="metric-val">£150k</div><div class="metric-sub">loan &middot; no shares issued</div></div>
+      <div class="metric"><div class="metric-label">Fixed annual payment</div><div class="metric-val">£100k</div><div class="metric-sub">years 2, 3 &amp; 4 only</div></div>
+      <div class="metric"><div class="metric-label">Done by</div><div class="metric-val">2030</div><div class="metric-sub">4 years &middot; clean finish</div></div>
+      <div class="metric"><div class="metric-label">DGC equity given away</div><div class="metric-val">0%</div><div class="metric-sub">Ash &amp; Harry keep 100%</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Daniel&rsquo;s payments &mdash; grace Year 1 then 3 fixed payments</div>
+      <div class="legend">
+        <span><span class="ls" style="background:#AFA9EC"></span>Fixed annual payment</span>
+        <span><span class="ll" style="border-top:2.5px solid #534AB7"></span>Daniel&rsquo;s cumulative total</span>
+        <span><span class="ll" style="border-top:2px dashed #EF9F27"></span>£300k target (deal ends)</span>
+        <span><span class="ll" style="border-top:2px dashed #ccc"></span>£150k investment</span>
+      </div>
+      <div class="chart-wrap"><canvas id="c4" role="img" aria-label="Fixed-term loan showing grace year then three equal £100k payments in years 2, 3 and 4"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Year by year breakdown</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Year</th><th>FY</th><th>Turnover</th><th>DGC EBITDA</th><th>Fixed payment</th><th>Daniel total</th><th>Status</th></tr></thead>
+          <tbody id="t4"></tbody>
+        </table>
+      </div>
+      <div class="table-note"><strong>Fixed payment</strong> = the same £100k regardless of DGC&rsquo;s profits that year &mdash; no calculation, no profit dependency. &middot; Year 1 is a full grace period (interest accrues at 19% APR). &middot; After 3 payments the agreement terminates automatically. &middot; 0% Isle of Man corporate tax throughout.</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">How this deal works &mdash; step by step</div>
+      <ol class="steps">
+        <li><div class="step-body"><div class="step-title">Daniel writes a cheque for £150,000 &mdash; as a loan</div><div class="step-text">The money goes into DGC as working capital. No shares are issued. Daniel does not appear on the shareholder register. He holds a simple loan agreement with a fixed repayment schedule &mdash; nothing more complex than that.</div></div></li>
+        <li><div class="step-body"><div class="step-title">A simple fixed-term loan agreement is signed</div><div class="step-text">An Isle of Man solicitor drafts a one-page agreement (approx. £300&ndash;£500). The terms: DGC Ltd will pay Daniel Aziz £100,000 on or before 31 December in each of 2028, 2029, and 2030. Total repayment: £300,000. Agreement terminates on receipt of final payment. No SHA, no profit calculations, no ongoing accountant involvement.</div></div></li>
+        <li><div class="step-body"><div class="step-title">Year 1 (2027) &mdash; full grace period, nothing paid</div><div class="step-text">The £150,000 works in the business for a full year before the first payment is due. DGC uses this time to deploy the capital and grow. Daniel is aware of this from day one &mdash; it is written into the contract. By the time payments start, DGC&rsquo;s EBITDA is projected to have grown from £300k to over £500k.</div></div></li>
+        <li><div class="step-body"><div class="step-title">Years 2, 3 and 4 &mdash; DGC pays Daniel £100,000 each year</div><div class="step-text">Fixed. Predictable. No calculation required. The payment is the same whether DGC has a strong year or a quiet one. By Year 2, DGC&rsquo;s EBITDA is projected at £500k, so £100k represents 20% of earnings &mdash; manageable. By Year 4 it drops to around 14% of a £700k EBITDA.</div></div></li>
+        <li><div class="step-body"><div class="step-title">Year 4 (2030) &mdash; final payment, agreement ends completely</div><div class="step-text">After the third £100,000 payment, Daniel has received £300,000. The agreement terminates. DGC has no further obligation to Daniel whatsoever. He holds no shares, no claim on future profits, no right to inspect accounts. The relationship as an investor is over &mdash; cleanly and permanently.</div></div></li>
+        <li><div class="step-body"><div class="step-title">Daniel&rsquo;s return: £150,000 profit on £150,000 lent &mdash; 100% return &mdash; 19% APR compound</div><div class="step-text">In plain terms: the FTSE 100 has averaged around 7&ndash;8% per year over the last decade with full market risk. Daniel earns more than double that rate, guaranteed, from his brother&rsquo;s profitable business. His £150k principal returns tax-free; the £150k profit is taxable Australian income spread across 3 years at approximately £50k per year.</div></div></li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Honest pros and cons</div>
+      <div class="pros-cons">
+        <div class="pros-box">
+          <h3>WHAT WORKS</h3>
+          <ul class="pc-list">
+            <li>The simplest deal on the table. Three payments of £100k and it&rsquo;s over. Daniel can explain it to anyone in one sentence: &ldquo;I lent my brother £150k and he paid me back £100k a year for three years.&rdquo;</li>
+            <li>Done by 2030. Four years total. Three years sooner than Option C. Daniel gets his money back fast and clean.</li>
+            <li>Fixed payments mean DGC&rsquo;s obligation is fully predictable. No dependency on profit margin decisions or distribution votes. It can be cash-flowed from day one.</li>
+            <li>19% APR is genuinely excellent for a private loan. Well above market returns. Zero volatility, zero risk of capital loss.</li>
+            <li>Zero equity given away. No ongoing relationship after 2030. No annual accounts conversations, no dividend negotiations, no cap table complications on a future sale.</li>
+          </ul>
+        </div>
+        <div class="cons-box">
+          <h3>WHAT TO WATCH</h3>
+          <ul class="pc-list">
+            <li>£100k/year is a fixed obligation regardless of performance. If Year 2 is unexpectedly slow, DGC still owes £100k. Option C adjusts to profits; this does not. Build a cash buffer in Year 1.</li>
+            <li>Daniel gets no share in DGC&rsquo;s long-term upside beyond £300k. If DGC grows to a £5M valuation by 2032, he sees none of it. The equity deals give him that participation &mdash; this does not.</li>
+            <li>Like Option C, Daniel cannot exit early. His capital is locked for 4 years with nothing to sell. Works perfectly for family capital; not right for someone who may need liquidity.</li>
+            <li>Must be presented before any equity expectation is formed. If Daniel is already expecting shares, the framing is: &ldquo;I want to give you a guaranteed 100% return by 2030 with no paperwork and nothing tied up in shares you can&rsquo;t sell.&rdquo;</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Board review &mdash; six experts, six verdicts</div>
+      <div class="card-sub">Applied to the fixed-term loan structure specifically.</div>
+      <div class="board-grid">
+        <div class="board-card">
+          <div class="board-book">ANGEL INVESTING</div>
+          <div class="board-name">David S. Rose</div>
+          <span class="board-verdict verdict-neutral">Not an angel structure &mdash; right one for this investor</span>
+          <p class="board-text">Angels need equity and a portfolio exit path. This provides neither. But as Rose notes: <em>&ldquo;Know your investor.&rdquo;</em> Daniel is family capital with a history of clean repayment deals (£50k &rarr; £55k). For this investor type, a fixed, guaranteed 100% return in 4 years is the appropriate instrument. A 19% APR fixed loan is a strong deal for Daniel. Don&rsquo;t over-engineer it.</p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">THE FOUNDER&rsquo;S DILEMMAS</div>
+          <div class="board-name">Noam Wasserman</div>
+          <span class="board-verdict verdict-ok">Maximum wealth preservation for founders</span>
+          <p class="board-text">Wasserman&rsquo;s core finding: founders who preserve equity at the growth stage finish significantly wealthier at exit. Option A costs DGC £1.89M+ over 17 years; this deal costs £300k fixed. That £1.59M difference stays with Ash and Harry. <em>&ldquo;Every point of equity you preserve on the way up compounds at the exit multiple.&rdquo;</em> This is the textbook answer to the wealth-vs-control question.</p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">DEALMAKING</div>
+          <div class="board-name">Guhan Subramanian</div>
+          <span class="board-verdict verdict-warn">Frame the outcome first, structure second</span>
+          <p class="board-text">Subramanian: <em>anchoring is everything.</em> Don&rsquo;t open with &ldquo;it&rsquo;s a loan, not shares.&rdquo; Open with the outcome Daniel receives: <em>&ldquo;I want to give you £300,000 &mdash; double your money &mdash; by 2030.&rdquo;</em> Then explain how. The structure is the mechanism that delivers what Daniel wants. If he anchors on the absence of equity before hearing the numbers, you&rsquo;ve lost before starting.</p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">NEVER SPLIT THE DIFFERENCE</div>
+          <div class="board-name">Chris Voss</div>
+          <span class="board-verdict verdict-ok">The strongest opening line of any option</span>
+          <p class="board-text">Voss: lead with what the other person gains. The pitch: <em>&ldquo;What if I could pay you £100,000 a year for three years &mdash; starting 2028 &mdash; with nothing locked in shares you can&rsquo;t sell?&rdquo;</em> That is concrete, vivid, and time-bound. Follow with a calibrated question: <em>&ldquo;How does £100k a year for three years compare to what your money is doing right now?&rdquo;</em> His answer tells you whether this works for him.</p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">GETTING TO YES</div>
+          <div class="board-name">Roger Fisher &amp; William Ury</div>
+          <span class="board-verdict verdict-warn">Surface Daniel&rsquo;s real interest first</span>
+          <p class="board-text">This deal aligns both parties financially. The risk is Daniel&rsquo;s underlying interest. If he wants a clean return &mdash; perfect. If he wants to <em>participate in DGC&rsquo;s story</em>, to say he owns a piece of what his brother built &mdash; this provides none of that. Fisher: <em>never assume the interest; surface it.</em> Ask before presenting: <em>&ldquo;What matters most to you &mdash; the return, or having a stake in the business?&rdquo;</em></p>
+        </div>
+        <div class="board-card">
+          <div class="board-book">VENTURE DEALS</div>
+          <div class="board-name">Brad Feld &amp; Jason Mendelson</div>
+          <span class="board-verdict verdict-ok">The right level of complexity for this round</span>
+          <p class="board-text">Feld: <em>&ldquo;Simple terms are always better than complex terms.&rdquo;</em> A one-page agreement with three payment dates is as simple as it gets. No SHA, no valuation, no anti-dilution, no cap table, no board seat. One page, three numbers, three dates. For a family £150k round at a £3M company, this is exactly the right level of complexity. <em>&ldquo;Complexity exists to protect against misaligned incentives. There are none here.&rdquo;</em></p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-fixed -->
+
   <div class="footer">
     DGC Ltd &middot; Isle of Man &middot; June 2026 &middot; Private &amp; confidential<br>
     Figures are projections based on 10% profit margin (optimistic case), 50% profit distribution, 4&times; profit valuation, 0% IoM corporate tax.<br>
@@ -532,7 +656,7 @@ function showTab(id){
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   document.getElementById('tab-'+id).classList.add('active');
   var btns=document.querySelectorAll('.tab-btn');
-  var map={orig:0,ratch:1,loan:2};
+  var map={orig:0,ratch:1,loan:2,fixed:3};
   btns[map[id]].classList.add('active');
   if(!charts[id]) initChart(id);
 }
@@ -541,6 +665,7 @@ function initChart(id){
   if(id==='orig') buildChart1();
   else if(id==='ratch') buildChart2();
   else if(id==='loan') buildChart3();
+  else if(id==='fixed') buildChart4();
 }
 
 /* ---- DEAL 1: Original */
@@ -672,6 +797,42 @@ function buildTable3(){
     h+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.eb+'</td><td>'+r.dist+'</td><td>'+r.dan+'</td><td>'+r.cum+'</td><td>'+r.ah+'</td><td>'+r.st+'</td></tr>';
   });
   document.getElementById('t3').innerHTML=h;
+}
+
+/* ---- DEAL 4: Fixed-term loan */
+var D4={
+  danAnn: [0,0,100,100,100,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  danCum: [0,0,100,200,300,300,300,300,300,300,300,300,300,300,300,300,300,300]
+};
+function buildChart4(){
+  var ctx=document.getElementById('c4').getContext('2d');
+  var bg=D4.danAnn.map(function(v){return v>0?'#AFA9EC':'rgba(0,0,0,0)';});
+  charts['fixed']=new Chart(ctx,{type:'bar',data:{labels:LABELS,datasets:[
+    {label:"Daniel's fixed payment",type:'bar',data:D4.danAnn,backgroundColor:bg,borderRadius:3,order:5},
+    {label:"Daniel's cumulative total",type:'line',data:D4.danCum,borderColor:'#534AB7',backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#534AB7',tension:0.3,order:1},
+    {label:'£300k target',type:'line',data:LABELS.map(function(){return 300;}),borderColor:'#EF9F27',backgroundColor:'transparent',borderWidth:1.5,borderDash:[5,4],pointRadius:0,order:2},
+    {label:'£150k investment',type:'line',data:LABELS.map(function(){return 150;}),borderColor:'#ccc',backgroundColor:'transparent',borderWidth:1,borderDash:[4,4],pointRadius:0,order:3}
+  ]},options:chartOpts()});
+  buildTable4();
+}
+function buildTable4(){
+  var rows=[
+    {yr:'Now',fy:'2026',to:'£3.0M',eb:'£300k',pmt:'—',cum:'—',st:'Loan received · grace begins',cl:'grace'},
+    {yr:'Y1',fy:'2027',to:'£4.0M',eb:'£400k',pmt:'£0',cum:'£0',st:'Grace period',cl:'grace'},
+    {yr:'Y2',fy:'2028',to:'£5.0M',eb:'£500k',pmt:'£100k',cum:'£100k',st:'Payment 1 of 3',cl:'payback'},
+    {yr:'Y3',fy:'2029',to:'£6.0M',eb:'£600k',pmt:'£100k',cum:'£200k',st:'Payment 2 of 3',cl:'payback'},
+    {yr:'Y4',fy:'2030',to:'£7.0M',eb:'£700k',pmt:'£100k',cum:'£300k ✓',st:'DONE',cl:'cap-hit'},
+    {sep:true,label:'★ DEAL COMPLETE · Daniel has received £300k · Agreement terminated · DGC owes nothing further ★'},
+    {yr:'Y5',fy:'2031',to:'£8.0M',eb:'£800k',pmt:'£0',cum:'£300k',st:'Done',cl:'ended-row'},
+    {yr:'Y10',fy:'2036',to:'£10.0M',eb:'£1.0M',pmt:'£0',cum:'£300k',st:'Done',cl:'ended-row'},
+    {yr:'Y17',fy:'2043',to:'£10.0M',eb:'£1.0M',pmt:'£0',cum:'£300k',st:'Done',cl:'ended-row'}
+  ];
+  var h='';
+  rows.forEach(function(r){
+    if(r.sep){h+='<tr class="ratchet-row" style="background:#eeedfe;color:#3C3489"><td colspan="7">'+r.label+'</td></tr>';return;}
+    h+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.eb+'</td><td>'+r.pmt+'</td><td>'+r.cum+'</td><td>'+r.st+'</td></tr>';
+  });
+  document.getElementById('t4').innerHTML=h;
 }
 
 function chartOpts(){
