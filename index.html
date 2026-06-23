@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+    // DGC single sign-on: open only if logged into the hub, otherwise bounce to the hub to sign in
+    (function(){ try{ var a=JSON.parse(localStorage.getItem('dgc_auth')||'null'); if(a && a.refreshTok) return; }catch(e){} location.replace('https://ashuraziztax-ux.github.io/dgc-hub/'); })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
