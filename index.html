@@ -3,7 +3,14 @@
 <head>
     <script>
     // DGC single sign-on: open only if logged into the hub, otherwise bounce to the hub to sign in
-    (function(){ try{ var a=JSON.parse(localStorage.getItem('dgc_auth')||'null'); if(a && a.refreshTok) return; }catch(e){} location.replace('https://ashuraziztax-ux.github.io/dgc-hub/'); })();
+    (function(){
+      var FULL=["ash@dgc.im","harry@dgc.im","ash@silverdale.im"];
+      function em(t){try{return (JSON.parse(atob((t.split('.')[1]||'').replace(/-/g,'+').replace(/_/g,'/'))).email||'').toLowerCase();}catch(e){return '';}}
+      try{ var a=JSON.parse(localStorage.getItem('dgc_auth')||'null');
+        if(a && a.refreshTok){ if(FULL.indexOf(em(a.idToken))>=0) return; location.replace('https://ashuraziztax-ux.github.io/dgc-budget/'); return; }
+      }catch(e){}
+      location.replace('https://ashuraziztax-ux.github.io/dgc-hub/');
+    })();
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
