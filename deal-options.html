@@ -97,6 +97,34 @@ tr.ended-row td{color:#bbb}
 .compare-box h3{font-size:13px;font-weight:500;margin-bottom:10px;color:#9FE1CB}
 .compare-box p{font-size:12px;color:#888780;line-height:1.6}
 .compare-box strong{color:#e0e0d8}
+.tracker-wrap{display:flex;flex-direction:column;gap:10px}
+.tracker-row{border:0.5px solid #e8e8e2;border-radius:9px;padding:14px 16px}
+.tracker-row-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px}
+.tracker-label{font-size:13px;font-weight:500;margin-bottom:2px}
+.tracker-status{font-size:11px;color:#888780}
+.tracker-status.ts-done{color:#0f6e56;font-weight:500}
+.tracker-status.ts-partial{color:#854F0B;font-weight:500}
+.tracker-btn{font-size:11px;padding:6px 12px;border:0.5px solid #e0e0d8;border-radius:6px;background:#fff;cursor:pointer;color:#3a3a38;white-space:nowrap;flex-shrink:0}
+.tracker-btn:hover{background:#f5f5f0}
+.tracker-amounts{display:flex;gap:18px;margin-bottom:10px;flex-wrap:wrap}
+.ta-lbl{font-size:11px;color:#888780;display:block;margin-bottom:1px}
+.ta-val{font-size:14px;font-weight:500;color:#1a1a18}
+.ta-val.tv-paid{color:#0f6e56}
+.ta-val.tv-owed{color:#b91c1c}
+.ta-val.tv-clear{color:#0f6e56}
+.tracker-bar-bg{background:#f0f0ea;border-radius:3px;height:5px;width:100%;margin-bottom:2px;overflow:hidden}
+.tracker-bar-fill{background:#534AB7;border-radius:3px;height:5px;transition:width 0.3s}
+.tracker-input-row{display:flex;gap:8px;align-items:center;margin-top:10px;padding-top:10px;border-top:0.5px solid #f0f0ea;flex-wrap:wrap}
+.tracker-input-row input{flex:1;min-width:120px;padding:7px 12px;border:1px solid #d0d0c8;border-radius:7px;font-size:13px;outline:none}
+.tracker-input-row input:focus{border-color:#534AB7}
+.tracker-confirm{padding:7px 14px;background:#534AB7;color:#fff;border:none;border-radius:7px;font-size:12px;cursor:pointer;font-weight:500}
+.tracker-cancel{padding:7px 12px;background:transparent;color:#888780;border:0.5px solid #e0e0d8;border-radius:7px;font-size:12px;cursor:pointer}
+.tracker-footer{display:flex;gap:20px;padding:12px 0 0;border-top:1px solid #e8e8e2;font-size:13px;flex-wrap:wrap;align-items:center}
+.tracker-footer strong{font-weight:500}
+.tracker-footer .tf-remain{color:#b91c1c}
+.tracker-footer .tf-done{color:#0f6e56}
+.tracker-reset{margin-left:auto;font-size:11px;color:#aaa;background:none;border:none;cursor:pointer;padding:2px}
+.tracker-reset:hover{color:#888}
 @media(max-width:640px){
   .metrics{grid-template-columns:repeat(2,1fr)}
   .pros-cons,.board-grid{grid-template-columns:1fr}
@@ -547,6 +575,13 @@ tr.ended-row td{color:#bbb}
     </div>
 
     <div class="card">
+      <div class="card-title">Payment tracker</div>
+      <div class="card-sub">Log actual payments as they&rsquo;re made. Enter partial amounts &mdash; each entry deducts from the running balance and shows what&rsquo;s still owed. Figures saved to this device.</div>
+      <div class="tracker-wrap" id="tracker-body"></div>
+      <div class="tracker-footer" id="tracker-footer"></div>
+    </div>
+
+    <div class="card">
       <div class="section-title">How this deal works &mdash; step by step</div>
       <ol class="steps">
         <li><div class="step-body"><div class="step-title">Daniel writes a cheque for £150,000 &mdash; as a loan</div><div class="step-text">The money goes into DGC as working capital. No shares are issued. Daniel does not appear on the shareholder register. He holds a simple loan agreement with a fixed repayment schedule &mdash; nothing more complex than that.</div></div></li>
@@ -833,6 +868,82 @@ function buildTable4(){
     h+='<tr class="'+r.cl+'"><td>'+r.yr+'</td><td>'+r.fy+'</td><td>'+r.to+'</td><td>'+r.eb+'</td><td>'+r.pmt+'</td><td>'+r.cum+'</td><td>'+r.st+'</td></tr>';
   });
   document.getElementById('t4').innerHTML=h;
+  renderTracker();
+}
+
+/* ---- OPTION D PAYMENT TRACKER */
+var TK_KEY='dgc_d4_tracker';
+var TK_OBS=[
+  {key:'y2',label:'Payment 1 of 3',year:'Year 2 (2028)',due:100000},
+  {key:'y3',label:'Payment 2 of 3',year:'Year 3 (2029)',due:100000},
+  {key:'y4',label:'Payment 3 of 3',year:'Year 4 (2030)',due:100000}
+];
+function tkLoad(){var d=localStorage.getItem(TK_KEY);return d?JSON.parse(d):{y2:0,y3:0,y4:0};}
+function tkSave(d){localStorage.setItem(TK_KEY,JSON.stringify(d));}
+function tkFmt(n){
+  if(n===0)return '£0';
+  if(n%1000===0)return '£'+Math.round(n/1000)+'k';
+  return '£'+n.toLocaleString('en-GB');
+}
+function renderTracker(){
+  var data=tkLoad();
+  var totalPaid=data.y2+data.y3+data.y4;
+  var totalDue=300000;
+  var totalRem=totalDue-totalPaid;
+  var h='';
+  TK_OBS.forEach(function(p){
+    var paid=data[p.key];
+    var rem=p.due-paid;
+    var pct=Math.min(100,Math.round((paid/p.due)*100));
+    var stClass=rem===0?'ts-done':paid>0?'ts-partial':'';
+    var stText=rem===0?'Paid in full':paid>0?'Partially paid — '+tkFmt(rem)+' still owed':'Not yet started';
+    h+='<div class="tracker-row">';
+    h+='<div class="tracker-row-head">';
+    h+='<div><div class="tracker-label">'+p.label+' — '+p.year+'</div>';
+    h+='<div class="tracker-status '+stClass+'">'+stText+'</div></div>';
+    if(rem>0){
+      h+='<button class="tracker-btn" onclick="tkOpen(\''+p.key+'\')">+ Log payment</button>';
+    } else {
+      h+='<button class="tracker-btn" style="color:#0f6e56;border-color:#0f6e56;background:#f0fdf4" disabled>✓ Paid</button>';
+    }
+    h+='</div>';
+    h+='<div class="tracker-amounts">';
+    h+='<span><span class="ta-lbl">Due</span><span class="ta-val">'+tkFmt(p.due)+'</span></span>';
+    h+='<span><span class="ta-lbl">Paid so far</span><span class="ta-val'+(paid>0?' tv-paid':'')+'">'+tkFmt(paid)+'</span></span>';
+    h+='<span><span class="ta-lbl">Still owed</span><span class="ta-val'+(rem===0?' tv-clear':rem<p.due?' tv-owed':'')+'">'+tkFmt(rem)+'</span></span>';
+    h+='</div>';
+    h+='<div class="tracker-bar-bg"><div class="tracker-bar-fill" style="width:'+pct+'%"></div></div>';
+    h+='<div id="tkinp-'+p.key+'" class="tracker-input-row" style="display:none">';
+    h+='<input type="number" id="tkval-'+p.key+'" placeholder="e.g. 40000" min="1" max="'+rem+'">';
+    h+='<button class="tracker-confirm" onclick="tkConfirm(\''+p.key+'\')">Confirm</button>';
+    h+='<button class="tracker-cancel" onclick="tkClose(\''+p.key+'\')">Cancel</button>';
+    h+='</div>';
+    h+='</div>';
+  });
+  document.getElementById('tracker-body').innerHTML=h;
+  var remClass=totalRem===0?'tf-done':'tf-remain';
+  var footer='<span>Total paid: <strong>'+tkFmt(totalPaid)+'</strong> of £300k</span>'+
+    '<span class="'+remClass+'">Balance remaining: <strong>'+tkFmt(totalRem)+'</strong></span>';
+  if(totalPaid>0){footer+='<button class="tracker-reset" onclick="tkReset()">Reset all</button>';}
+  document.getElementById('tracker-footer').innerHTML=footer;
+}
+function tkOpen(key){
+  document.querySelectorAll('.tracker-input-row').forEach(function(el){el.style.display='none';});
+  document.getElementById('tkinp-'+key).style.display='flex';
+  setTimeout(function(){document.getElementById('tkval-'+key).focus();},50);
+}
+function tkClose(key){document.getElementById('tkinp-'+key).style.display='none';}
+function tkConfirm(key){
+  var inp=document.getElementById('tkval-'+key);
+  var amount=parseFloat(inp.value);
+  if(isNaN(amount)||amount<=0)return;
+  var data=tkLoad();
+  data[key]=Math.min(data[key]+amount,100000);
+  tkSave(data);
+  renderTracker();
+}
+function tkReset(){
+  if(confirm('Reset all payment records?')){localStorage.removeItem(TK_KEY);renderTracker();}
 }
 
 function chartOpts(){
